@@ -1,0 +1,345 @@
+/* CSS/dashboard.css
+Styles for the Dashboard page
+Stats cards, updates table, layout, and responsive design
+- Highlighting for changed fields
+*/
+
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #4CAF50;
+    --dark-gray: #333;
+    --light-gray: #ddd;
+    --danger-color: #f44336;
+    --success-bg: #dff0d8;
+    --danger-bg: #f2dede;
+    --accent-light: #e8f5e9;
+}
+
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 60px 0 0 0; /* Account for fixed header */
+    background-color: #acbace;
+    min-height: 100vh;
+}
+
+/* Main Content Styles */
+.main-content {
+    background: linear-gradient(120deg, #e0e7ff 0%, #f4f6f9 100%);
+    min-height: 100vh;
+    padding: 40px 0 0 0;
+}
+
+.dashboard-container {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(80, 120, 200, 0.10);
+    padding: 32px 32px 24px 32px;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+
+.page-title {
+    margin: 0;
+    color: #333;
+    font-size: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #e3e6f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 4px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+}
+
+/* Form Styles */
+.form-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Dashboard Stats */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(51, 204, 255, 0.10);
+    padding: 32px 24px 24px 24px;
+    color: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(51, 204, 255, 0.18);
+}
+
+.stat-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    opacity: 0.95;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-card-title i {
+    font-size: 1.5rem;
+    opacity: 0.85;
+}
+
+.stat-card-number {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin: 18px 0 10px 0;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.stat-card-desc {
+    font-size: 1.1rem;
+    opacity: 0.92;
+    font-weight: 400;
+}
+
+/* Updates Section */
+.updates-section {
+    background: #f8f9fc;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(80, 120, 200, 0.07);
+    padding: 28px 20px 20px 20px;
+    margin-top: 20px;
+}
+
+.updates-section h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.3rem;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.section-header h2 {
+    font-size: 1.3rem;
+    color: #4e73df;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    table-layout: fixed;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(80, 120, 200, 0.06);
+}
+
+.inventory-table th,
+.inventory-table td {
+    border: 1px solid #e3e6f0;
+    padding: 12px 10px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inventory-table th {
+    background: #e0e7ff;
+    color: #4e73df;
+    font-size: 1rem;
+    font-weight: 700;
+    border-bottom: 2px solid #c7d2fe;
+    position: sticky;
+    top: 0;
+}
+
+.inventory-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.inventory-table tr:hover {
+    background: #2cb8cb;
+    transition: background 0.2s;
+}
+
+.inventory-table td.highlight-history {
+    background: #e6ffe6 !important;
+    border-left: 4px solid #4CAF50;
+    font-weight: 600;
+}
+
+.no-updates {
+    text-align: center;
+    padding: 30px;
+    color: #888;
+    font-style: italic;
+    background: #f1f5fb;
+    font-size: 1.1rem;
+    border-radius: 6px;
+}
+
+/* User header styling */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.user-role {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    margin-bottom: 32px;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid #e3e6f0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.welcome-message {
+    font-size: 2rem;
+    color: #4e73df;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    .dashboard-container {
+        padding: 15px;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-container {
+        padding: 12px 4px;
+    }
+    .stat-card {
+        padding: 18px 10px 14px 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .stat-card {
+        padding: 12px 6px 10px 6px;
+    }
+    .updates-section {
+        padding: 10px 2px 8px 2px;
+    }
+}
