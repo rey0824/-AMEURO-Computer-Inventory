@@ -17,7 +17,7 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'User';
                 <ul>
                     <li><a href="dashboard.php" <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'class="active"' : ''; ?>><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li><a href="list.php" <?php echo basename($_SERVER['PHP_SELF']) == 'list.php' ? 'class="active"' : ''; ?>><i class="fas fa-desktop"></i> Computer Inventory</a></li>
-                    <li><a href="list.php" <?php echo basename($_SERVER['PHP_SELF']) == 'list.php' ? 'class="active"' : ''; ?>><i class="fas fa-circle-user "></i> User</a></li>
+                    <li><a href="User.php" <?php echo basename($_SERVER['PHP_SELF']) == 'User.php' ? 'class="active"' : ''; ?>><i class="fas fa-circle-user "></i> User</a></li>
                 </ul>
             </nav>
             <div class="user-info">

@@ -4,28 +4,39 @@
 require_once 'dashbackend.php';
 
 // Fetch dashboard stats and recent activity
-$recentComputers = getRecentlyUpdatedComputers($conn); // 10 most recent updates
-$totalComputers = getTotalComputerCount($conn);
-$totalUsers = getTotalUserCount($conn);
+$recentComputers = getRecentlyUpdatedComputers($conn);
+$stats = getDashboardStats($conn);
 
-// Fetch the most recent update from both tblcomputer and tblcomputer_history
-$recentActivityUser = '-';
-$recentActivityTime = 'No updates yet';
-$latestHistory = $conn->query("SELECT updated_by, timestamp FROM tblcomputer_history ORDER BY timestamp DESC LIMIT 1");
-$latestComputer = $conn->query("SELECT user, last_updated FROM tblcomputer WHERE last_updated IS NOT NULL ORDER BY last_updated DESC LIMIT 1");
+$totalComputers = $stats['total_computers'];
+$totalUsers = $stats['total_users'];
 
-$historyRow = $latestHistory && $latestHistory->num_rows > 0 ? $latestHistory->fetch_assoc() : null;
-$computerRow = $latestComputer && $latestComputer->num_rows > 0 ? $latestComputer->fetch_assoc() : null;
-
-$historyTime = $historyRow && $historyRow['timestamp'] ? strtotime($historyRow['timestamp']) : 0;
-$computerTime = $computerRow && $computerRow['last_updated'] ? strtotime($computerRow['last_updated']) : 0;
+// Determine most recent activity
+$historyTime = $stats['latest_history_update'] ? strtotime($stats['latest_history_update']) : 0;
+$computerTime = $stats['latest_computer_update'] ? strtotime($stats['latest_computer_update']) : 0;
 
 if ($historyTime >= $computerTime && $historyTime > 0) {
+    // Get the user who made the most recent history update
+    $historyUserQuery = "SELECT updated_by FROM tblcomputer_history WHERE timestamp = ? LIMIT 1";
+    $stmt = $conn->prepare($historyUserQuery);
+    $stmt->bind_param('s', $stats['latest_history_update']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $historyRow = $result->fetch_assoc();
     $recentActivityUser = $historyRow['updated_by'] ? htmlspecialchars($historyRow['updated_by']) : '-';
     $recentActivityTime = date('Y-m-d H:i:s', $historyTime);
 } elseif ($computerTime > 0) {
+    // Get the user who made the most recent computer update
+    $computerUserQuery = "SELECT user FROM tblcomputer WHERE last_updated = ? LIMIT 1";
+    $stmt = $conn->prepare($computerUserQuery);
+    $stmt->bind_param('s', $stats['latest_computer_update']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $computerRow = $result->fetch_assoc();
     $recentActivityUser = $computerRow['user'] ? htmlspecialchars($computerRow['user']) : '-';
     $recentActivityTime = date('Y-m-d H:i:s', $computerTime);
+} else {
+    $recentActivityUser = '-';
+    $recentActivityTime = 'No updates yet';
 }
 
 // Get current page filename for active navigation highlighting
@@ -39,20 +50,22 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <title>Dashboard - AmEuro System</title>
     <link rel="stylesheet" href="CSS/nav.css">
     <link rel="stylesheet" href="CSS/dashboard.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
 </head>
 <body>
     <?php include 'header.php'; ?>
 
     <div class="main-content">
         <div class="dashboard-container">
-            <div class="dashboard-header">
+            <div class="dashboard-header" style="margin-bottom: 40px; padding-bottom: 24px; border-bottom: 2px solid #e3e6f0;">
                 <div class="welcome-message">
                     Welcome, <?php echo htmlspecialchars(isset($_SESSION['name']) ? $_SESSION['name'] : 'User'); ?>
                 </div>
             </div>
             
-            <div class="stats-container">
+            <div class="stats-container" style="margin-bottom: 48px;">
                 <div class="stat-card">
                     <div class="stat-card-title">
                         <i class="fas fa-desktop"></i>Total Computers
@@ -78,7 +91,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
 
-            <div class="updates-section">
+            <div class="updates-section" style="margin-top: 36px;">
                 <div class="section-header">
                     <h2><i class="fas fa-history"></i> Recent Computer Updates</h2>
                 </div>
@@ -88,6 +101,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <tr>
                                 <th>ID</th>
                                 <th>Department</th>
+                                <th>Machine Type</th>
                                 <th>User</th>
                                 <th>Comp. Name</th>
                                 <th>IP</th>
@@ -111,12 +125,23 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                         <?php
                                         $prev = $computer['history_previous'] ?? [];
                                         $curr = $computer['history_new'] ?? $computer;
-                                        $fields = ['department','user','computer_name','ip','processor','MOBO','power_supply','ram','SSD','OS'];
+                                        $fields = ['department','machine_type','user','computer_name','ip','processor','MOBO','power_supply','ram','SSD','OS'];
                                         ?>
                                         <td><?php echo htmlspecialchars($computer['computer_No']); ?></td>
                                         <?php foreach ($fields as $field): ?>
-                                            <?php $changed = isset($prev[$field]) && isset($curr[$field]) && $prev[$field] !== $curr[$field]; ?>
-                                            <td<?php if ($changed): ?> class="highlight-history"<?php endif; ?>><?php echo htmlspecialchars($curr[$field] ?? $computer[$field]); ?></td>
+                                            <?php 
+                                            if ($field === 'machine_type') {
+                                                $prevVal = isset($prev[$field]) ? strtolower($prev[$field]) : null;
+                                                $currVal = isset($curr[$field]) ? strtolower($curr[$field]) : null;
+                                                $changed = isset($prevVal, $currVal) && $prevVal !== $currVal;
+                                                $displayVal = isset($curr[$field]) ? ucfirst(strtolower($curr[$field])) : (isset($computer[$field]) ? ucfirst(strtolower($computer[$field])) : '');
+                                            } else {
+                                                $changed = isset($prev[$field]) && isset($curr[$field]) && $prev[$field] !== $curr[$field];
+                                                $displayVal = $curr[$field] ?? $computer[$field];
+                                            }
+                                            $titleAttr = (!empty($displayVal)) ? ' title="' . htmlspecialchars($displayVal) . '"' : '';
+                                            ?>
+                                            <td<?php if ($changed): ?> class="highlight-history"<?php endif; echo $titleAttr; ?>><?php echo htmlspecialchars($displayVal); ?></td>
                                         <?php endforeach; ?>
                                         <td class="timestamp"><?php echo htmlspecialchars($computer['formatted_time']); ?></td>
                                     </tr>

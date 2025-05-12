@@ -1,16 +1,22 @@
 <?php
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/php-error.log');
+header('Content-Type: application/json');
 require_once 'DB.php'; // Include database connection
 
 // Ensure user is logged in
 require_login();
 
 // Ensure username is set in session for update logging
-if (!isset($_SESSION['username']) && isset($_SESSION['name'])) {
-    $_SESSION['username'] = $_SESSION['name'];
+if (!isset($_SESSION['username'])) {
+    if (isset($_SESSION['name'])) {
+        $_SESSION['username'] = $_SESSION['name'];
+    } elseif (isset($_SESSION['emp_ID'])) {
+        // If we have emp_ID but no username, set a default
+        $_SESSION['username'] = 'User_' . $_SESSION['emp_ID'];
+    }
 }
-
-// Set headers for JSON response
-header('Content-Type: application/json');
 
 // Global error handler for exceptions
 set_exception_handler(function($e) {
@@ -58,6 +64,9 @@ switch ($action) {
     case 'update':
         updateComputer();
         break;
+    case 'deactivate':
+        deactivateComputer();
+        break;
     case 'delete':
         deleteComputer();
         break;
@@ -68,6 +77,14 @@ switch ($action) {
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
 }
+
+// Recommended database indexes for better search performance:
+// ALTER TABLE tblcomputer ADD INDEX idx_department (department);
+// ALTER TABLE tblcomputer ADD INDEX idx_user (user);
+// ALTER TABLE tblcomputer ADD INDEX idx_computer_name (computer_name);
+// ALTER TABLE tblcomputer ADD INDEX idx_ip (ip);
+// ALTER TABLE tblcomputer ADD INDEX idx_last_updated (last_updated);
+// ALTER TABLE tblcomputer_history ADD INDEX idx_computer_timestamp (computer_No, timestamp);
 
 // Get paginated and filtered list of computers
 function getComputersList() {
@@ -141,18 +158,24 @@ function getComputersList() {
         $whereClause = "WHERE " . implode(" AND ", $conditions);
     }
     
-    $countSql = "SELECT COUNT(*) as total FROM tblcomputer $whereClause";
-    $stmt = $conn->prepare($countSql);
-    
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $totalRows = $result->fetch_assoc()['total'];
-    
-    $sql = "SELECT *, DATE_FORMAT(last_updated, '%Y-%m-%d %H:%i:%s') as formatted_date FROM tblcomputer $whereClause ORDER BY computer_No ASC LIMIT ? OFFSET ?";
+    // Optimized query to get both count and data in a single query
+    $sql = "SELECT SQL_CALC_FOUND_ROWS c.*, 
+            DATE_FORMAT(c.last_updated, '%m-%d-%y %H:%i:%s') as formatted_date,
+            h.previous_data, h.new_data
+            FROM tblcomputer c
+            LEFT JOIN (
+                SELECT computer_No, previous_data, new_data
+                FROM tblcomputer_history h1
+                WHERE timestamp = (
+                    SELECT MAX(timestamp)
+                    FROM tblcomputer_history h2
+                    WHERE h2.computer_No = h1.computer_No
+                )
+            ) h ON c.computer_No = h.computer_No
+            $whereClause 
+            ORDER BY c.computer_No ASC 
+            LIMIT ? OFFSET ?";
+            
     $stmt = $conn->prepare($sql);
     
     $types .= 'ii';
@@ -163,16 +186,14 @@ function getComputersList() {
     $stmt->execute();
     $result = $stmt->get_result();
     
+    // Get total count using FOUND_ROWS()
+    $totalRows = $conn->query("SELECT FOUND_ROWS()")->fetch_row()[0];
+    
     $computers = [];
     while ($row = $result->fetch_assoc()) {
-        $historySql = "SELECT previous_data, new_data FROM tblcomputer_history WHERE computer_No = ? ORDER BY timestamp DESC LIMIT 1";
-        $historyStmt = $conn->prepare($historySql);
-        $historyStmt->bind_param('i', $row['computer_No']);
-        $historyStmt->execute();
-        $historyResult = $historyStmt->get_result();
-        $history = $historyResult->fetch_assoc();
-        $row['history_previous'] = $history ? json_decode($history['previous_data'], true) : null;
-        $row['history_new'] = $history ? json_decode($history['new_data'], true) : null;
+        $row['history_previous'] = $row['previous_data'] ? json_decode($row['previous_data'], true) : null;
+        $row['history_new'] = $row['new_data'] ? json_decode($row['new_data'], true) : null;
+        unset($row['previous_data'], $row['new_data']);
         $computers[] = $row;
     }
     
@@ -215,33 +236,59 @@ function getComputerDetails() {
 function addComputer() {
     global $conn;
     $data = sanitize_all($_POST);
-    $sql = "INSERT INTO tblcomputer (department, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param(
-        'ssssssssssss',
-        $data['department'],
-        $data['user'],
-        $data['computer_name'],
-        $data['ip'],
-        $data['processor'],
-        $data['MOBO'],
-        $data['power_supply'],
-        $data['ram'],
-        $data['SSD'],
-        $data['OS'],
-        $data['deployment_date']
-    );
-    if ($stmt->execute()) {
-        $newId = $conn->insert_id;
+    
+    // Set default values for empty fields
+    $fields = ['department', 'user', 'Machine_type', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'deployment_date'];
+    foreach ($fields as $field) {
+        if (!isset($data[$field]) || $data[$field] === '') {
+            $data[$field] = null;
+        }
+    }
+    
+    // Ensure minimum required data is present
+    if (empty($data['department']) || empty($data['computer_name']) || empty($data['ip'])) {
         echo json_encode([
-            'success' => true, 
-            'message' => 'Computer added successfully',
-            'id' => $newId
+            'success' => false,
+            'message' => 'Department, Computer Name, and IP Address are required fields'
         ]);
-    } else {
+        return;
+    }
+    
+    try {
+        $sql = "INSERT INTO tblcomputer (department, user, Machine_type, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, deployment_date, last_updated) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param(
+            'sssssssssssss',
+            $data['department'],
+            $data['user'],
+            $data['Machine_type'],
+            $data['computer_name'],
+            $data['ip'],
+            $data['processor'],
+            $data['MOBO'],
+            $data['power_supply'],
+            $data['ram'],
+            $data['SSD'],
+            $data['OS'],
+            $data['MAC_Address'],
+            $data['deployment_date']
+        );
+
+        if ($stmt->execute()) {
+            $newId = $conn->insert_id;
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Computer added successfully',
+                'id' => $newId
+            ]);
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
         echo json_encode([
             'success' => false, 
-            'message' => 'Failed to add computer: ' . $conn->error
+            'message' => 'Failed to add computer: ' . $e->getMessage()
         ]);
     }
 }
@@ -254,20 +301,44 @@ function updateComputer() {
         $conn->begin_transaction();
         $id = isset($_POST['computer_No']) ? (int)$_POST['computer_No'] : 0;
         $comment = isset($_POST['comment']) ? sanitize_input($_POST['comment']) : '';
+        
         if ($id <= 0) {
             throw new Exception('Invalid computer ID');
         }
+        
+        // Set default values for empty fields and handle required fields
+        $data = sanitize_all($_POST);
+        $fields = ['department', 'user', 'Machine_type', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'deployment_date'];
+        foreach ($fields as $field) {
+            if (!isset($data[$field]) || $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+        
+        // Ensure minimum required data is present
+        if (empty($data['department']) || empty($data['computer_name']) || empty($data['ip'])) {
+            throw new Exception('Department, Computer Name, and IP Address are required fields');
+        }
+        
+        // Get current data for history logging
         $currentSql = "SELECT * FROM tblcomputer WHERE computer_No = ?";
         $currentStmt = $conn->prepare($currentSql);
         $currentStmt->bind_param('i', $id);
         $currentStmt->execute();
-        $currentData = $currentStmt->get_result()->fetch_assoc();
-        $data = sanitize_all($_POST);
+        $result = $currentStmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            throw new Exception('Computer not found with ID: ' . $id);
+        }
+        
+        $currentData = $result->fetch_assoc();
+        
         $changes = [
             'previous' => $currentData,
             'new' => [
                 'department' => $data['department'],
                 'user' => $data['user'],
+                'Machine_type' => $data['Machine_type'],
                 'computer_name' => $data['computer_name'],
                 'ip' => $data['ip'],
                 'processor' => $data['processor'],
@@ -276,22 +347,38 @@ function updateComputer() {
                 'ram' => $data['ram'],
                 'SSD' => $data['SSD'],
                 'OS' => $data['OS'],
+                'MAC_Address' => $data['MAC_Address'],
                 'deployment_date' => $data['deployment_date']
             ]
         ];
-        $historySql = "INSERT INTO tblcomputer_history (computer_No, previous_data, new_data, updated_by, comment) VALUES (?, ?, ?, ?, ?)";
-        $historyStmt = $conn->prepare($historySql);
-        $jsonPrevious = json_encode($changes['previous']);
-        $jsonNew = json_encode($changes['new']);
-        $updatedBy = isset($_SESSION['username']) ? $_SESSION['username'] : 'Unknown';
-        $historyStmt->bind_param('issss', $id, $jsonPrevious, $jsonNew, $updatedBy, $comment);
-        $historyStmt->execute();
-        $sql = "UPDATE tblcomputer SET department = ?, user = ?, computer_name = ?, ip = ?, processor = ?, MOBO = ?, power_supply = ?, ram = ?, SSD = ?, OS = ?, deployment_date = ?, last_updated = NOW() WHERE computer_No = ?";
+        
+        // Only log history if there are actual changes
+        $hasChanges = false;
+        foreach ($fields as $field) {
+            if ($changes['previous'][$field] != $changes['new'][$field]) {
+                $hasChanges = true;
+                break;
+            }
+        }
+        
+        // Log history only if there are changes or a comment is provided
+        if ($hasChanges || !empty($comment)) {
+            $historySql = "INSERT INTO tblcomputer_history (computer_No, previous_data, new_data, updated_by, comment) VALUES (?, ?, ?, ?, ?)";
+            $historyStmt = $conn->prepare($historySql);
+            $jsonPrevious = json_encode($changes['previous']);
+            $jsonNew = json_encode($changes['new']);
+            $updatedBy = isset($_SESSION['username']) ? $_SESSION['username'] : 'Unknown';
+            $historyStmt->bind_param('issss', $id, $jsonPrevious, $jsonNew, $updatedBy, $comment);
+            $historyStmt->execute();
+        }
+        
+        $sql = "UPDATE tblcomputer SET department = ?, user = ?, Machine_type = ?, computer_name = ?, ip = ?, processor = ?, MOBO = ?, power_supply = ?, ram = ?, SSD = ?, OS = ?, MAC_Address = ?, deployment_date = ?, last_updated = NOW() WHERE computer_No = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            'ssssssssssssi',
+            'sssssssssssssi',
             $data['department'],
             $data['user'],
+            $data['Machine_type'],
             $data['computer_name'],
             $data['ip'],
             $data['processor'],
@@ -300,9 +387,11 @@ function updateComputer() {
             $data['ram'],
             $data['SSD'],
             $data['OS'],
+            $data['MAC_Address'],
             $data['deployment_date'],
             $id
         );
+        
         if ($stmt->execute()) {
             $conn->commit();
             echo json_encode([
@@ -314,7 +403,9 @@ function updateComputer() {
             throw new Exception('Failed to update computer: ' . $conn->error);
         }
     } catch (Exception $e) {
-        $conn->rollback();
+        if ($conn->inTransaction()) {
+            $conn->rollback();
+        }
         echo json_encode([
             'success' => false,
             'message' => $e->getMessage()
@@ -417,7 +508,7 @@ function getComputerHistory() {
             $previousVersion = $changes['previous'];
         }
     }
-    $currentSql = "SELECT department, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date FROM tblcomputer WHERE computer_No = ?";
+    $currentSql = "SELECT department, Machine_type, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, deployment_date FROM tblcomputer WHERE computer_No = ?";
     $currentStmt = $conn->prepare($currentSql);
     $currentStmt->bind_param('i', $id);
     $currentStmt->execute();
@@ -438,8 +529,8 @@ function compareVersions($old, $new) {
     
     $changes = [];
     $fields = [
-        'department', 'user', 'computer_name', 'ip', 'processor', 
-        'MOBO', 'power_supply', 'ram', 'SSD', 'OS'
+        'department', 'Machine_type', 'user', 'computer_name', 'ip', 'processor', 
+        'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'deployment_date'
     ];
     
     foreach ($fields as $field) {
@@ -474,6 +565,74 @@ function addChangeComment() {
         echo json_encode(['success' => true, 'message' => 'Comment added successfully']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to add comment']);
+    }
+}
+
+// Deactivate a computer and log the status change
+function deactivateComputer() {
+    global $conn;
+    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    if ($id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid computer ID']);
+        return;
+    }
+
+    try {
+        $conn->begin_transaction();
+
+        // Get current data
+        $currentSql = "SELECT * FROM tblcomputer WHERE computer_No = ?";
+        $currentStmt = $conn->prepare($currentSql);
+        $currentStmt->bind_param('i', $id);
+        $currentStmt->execute();
+        $currentData = $currentStmt->get_result()->fetch_assoc();
+
+        if (!$currentData) {
+            throw new Exception('Computer not found');
+        }
+
+        // Toggle active status
+        $newStatus = $currentData['is_active'] === 'Y' ? 'N' : 'Y';
+        $updatedBy = isset($_SESSION['username']) ? $_SESSION['username'] : 'Unknown';
+        $comment = isset($_POST['comment']) ? sanitize_input($_POST['comment']) : '';
+
+        // Update computer status
+        $updateSql = "UPDATE tblcomputer SET is_active = ?, status_changed_by = ?, status_changed_date = NOW() WHERE computer_No = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param('ssi', $newStatus, $updatedBy, $id);
+
+        // Log the change in history
+        $historySql = "INSERT INTO tblcomputer_history (computer_No, previous_data, new_data, updated_by, comment) VALUES (?, ?, ?, ?, ?)";
+        $historyStmt = $conn->prepare($historySql);
+        
+        $previousData = $currentData;
+        $newData = array_merge($currentData, [
+            'is_active' => $newStatus,
+            'status_changed_by' => $updatedBy,
+            'status_changed_date' => date('Y-m-d H:i:s')
+        ]);
+
+        $jsonPrevious = json_encode($previousData);
+        $jsonNew = json_encode($newData);
+        $historyStmt->bind_param('issss', $id, $jsonPrevious, $jsonNew, $updatedBy, $comment);
+
+        if ($updateStmt->execute() && $historyStmt->execute()) {
+            $conn->commit();
+            echo json_encode([
+                'success' => true,
+                'message' => 'Computer ' . ($newStatus === 'Y' ? 'activated' : 'deactivated') . ' successfully'
+            ]);
+        } else {
+            throw new Exception('Failed to update computer status');
+        }
+    } catch (Exception $e) {
+        if ($conn->inTransaction()) {
+            $conn->rollback();
+        }
+        echo json_encode([
+            'success' => false,
+            'message' => 'Failed to update computer status: ' . $e->getMessage()
+        ]);
     }
 }
 ?>

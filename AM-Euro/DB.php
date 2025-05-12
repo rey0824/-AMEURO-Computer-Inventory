@@ -42,9 +42,16 @@ function redirect($url) {
     exit();
 }
 
-// Require user to be logged in, otherwise redirect to login
+// Require user to be logged in, otherwise return JSON error if called from API, or redirect to login for normal pages
 function require_login() {
     if (!is_logged_in()) {
+        // If this is an API call (expects JSON), return JSON error
+        if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            exit();
+        }
+        // Otherwise, redirect to login page
         if (basename($_SERVER['PHP_SELF']) !== 'login.php') {
             redirect('login.php'); 
         } else {

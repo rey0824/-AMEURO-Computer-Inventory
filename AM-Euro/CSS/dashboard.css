@@ -1,9 +1,9 @@
-/* CSS/dashboard.css
-Styles for the Dashboard page
-Stats cards, updates table, layout, and responsive design
-- Highlighting for changed fields
-*/
+/* Dashboard Styles
+ * Main stylesheet for the dashboard interface
+ * Includes layout, cards, tables, and responsive design
+ */
 
+/* ===== Variables ===== */
 :root {
     --primary-color: #4e73df;
     --secondary-color: #4CAF50;
@@ -15,44 +15,39 @@ Stats cards, updates table, layout, and responsive design
     --accent-light: #e8f5e9;
 }
 
-/* General Styles */
+/* ===== Base Styles ===== */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 60px 0 0 0; /* Account for fixed header */
+    padding: 60px 0 0 0;
     background-color: #acbace;
     min-height: 100vh;
 }
 
-/* Main Content Styles */
+/* ===== Layout Components ===== */
 .main-content {
     background: linear-gradient(120deg, #e0e7ff 0%, #f4f6f9 100%);
     min-height: 100vh;
     padding: 40px 0 0 0;
+    overflow: visible !important;
 }
 
 .dashboard-container {
     background: #fff;
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(80, 120, 200, 0.10);
-    padding: 32px 32px 24px 32px;
+    padding: 32px;
     margin: 0 auto;
-    max-width: 1400px;
-}
-
-.page-title {
-    margin: 0;
-    color: #333;
-    font-size: 30px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: visible !important;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 700px;
     margin: 0 auto;
     padding: 10px;
 }
 
+/* ===== Header Styles ===== */
 header {
     display: flex;
     justify-content: space-between;
@@ -63,31 +58,184 @@ header {
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.title {
+.dashboard-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #e3e6f0;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.welcome-message {
     font-size: 2rem;
-    font-weight: 600;
     color: var(--primary-color);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.search-container {
-    position: relative;
-    width: 300px;
+.welcome-message i {
+    font-size: 2.2rem;
+    color: #33ccff;
 }
 
-.search-input {
+/* ===== Stats Cards ===== */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+    margin-bottom: 40px;
     width: 100%;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--light-gray);
-    border-radius: 4px;
-    outline: none;
-    font-size: 0.9rem;
 }
 
-.search-input:focus {
-    border-color: var(--primary-color);
+.stat-card {
+    background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
+    border-radius: 20px;
+    box-shadow: 0 6px 28px rgba(51, 204, 255, 0.13);
+    padding: 40px 32px;
+    color: #fff;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
 }
 
-/* Form Styles */
+.stat-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(51, 204, 255, 0.18);
+}
+
+.stat-card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    opacity: 0.97;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.stat-card-title i {
+    font-size: 2.4rem;
+    opacity: 0.90;
+}
+
+.stat-card-number {
+    font-size: 3.6rem;
+    font-weight: 900;
+    margin: 22px 0 14px;
+    letter-spacing: 1.5px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.10);
+}
+
+.stat-card-desc {
+    font-size: 1.15rem;
+    opacity: 0.94;
+    font-weight: 400;
+}
+
+/* ===== Updates Section ===== */
+.updates-section {
+    background: #f8f9fc;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(80, 120, 200, 0.07);
+    padding: 32px 24px;
+    margin-top: 20px;
+}
+
+.updates-section h2 {
+    margin-bottom: 24px;
+    color: #333;
+    font-size: 1.4rem;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e3e6f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.updates-section h2 i {
+    color: var(--primary-color);
+    font-size: 1.6rem;
+}
+
+/* ===== Table Styles ===== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: inset 0 -6px 8px -8px #8882;
+}
+
+.inventory-table {
+    min-width: 1200px;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 1rem;
+    table-layout: fixed;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(80, 120, 200, 0.10);
+}
+
+.inventory-table th,
+.inventory-table td {
+    border: none;
+    padding: 20px 16px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: none;
+    font-size: 1.05rem;
+    vertical-align: middle;
+    position: relative;
+}
+
+.inventory-table th {
+    background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
+    color: #fff;
+}
+
+.inventory-table tr {
+    transition: background 0.18s;
+}
+
+.inventory-table tr:nth-child(even) {
+    background-color: #f6f8fc;
+}
+
+.inventory-table tr:hover {
+    background: #e3eafe;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(78, 115, 223, 0.10);
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.inventory-table td {
+    border-bottom: 1.5px solid #e3e6f0;
+    font-size: 0.98rem;
+    color: #222;
+    max-width: 180px;
+    cursor: pointer;
+}
+
+.inventory-table td.highlight-history {
+    background: var(--accent-light) !important;
+    border-left: 4px solid var(--secondary-color);
+    font-weight: 600;
+    color: #256029;
+}
+
+/* ===== Form Styles ===== */
 .form-container {
     background-color: #ffffff;
     padding: 20px;
@@ -114,210 +262,103 @@ header {
     box-sizing: border-box;
 }
 
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-/* Dashboard Stats */
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 32px;
-    margin-bottom: 40px;
-    width: 100%;
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(51, 204, 255, 0.10);
-    padding: 32px 24px 24px 24px;
-    color: #fff;
-    transition: transform 0.2s, box-shadow 0.2s;
+/* ===== Search Styles ===== */
+.search-container {
     position: relative;
-    overflow: hidden;
+    width: 300px;
 }
 
-.stat-card:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 8px 32px rgba(51, 204, 255, 0.18);
-}
-
-.stat-card-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 10px;
-    opacity: 0.95;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.stat-card-title i {
-    font-size: 1.5rem;
-    opacity: 0.85;
-}
-
-.stat-card-number {
-    font-size: 3.2rem;
-    font-weight: 800;
-    margin: 18px 0 10px 0;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.stat-card-desc {
-    font-size: 1.1rem;
-    opacity: 0.92;
-    font-weight: 400;
-}
-
-/* Updates Section */
-.updates-section {
-    background: #f8f9fc;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(80, 120, 200, 0.07);
-    padding: 28px 20px 20px 20px;
-    margin-top: 20px;
-}
-
-.updates-section h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 1.3rem;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.section-header h2 {
-    font-size: 1.3rem;
-    color: #4e73df;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 0;
-}
-
-/* Table Styles */
-.table-responsive {
-    overflow-x: auto;
-    margin-top: 10px;
-}
-
-.inventory-table {
+.search-input {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-    table-layout: fixed;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(80, 120, 200, 0.06);
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 4px;
+    outline: none;
+    font-size: 0.9rem;
 }
 
-.inventory-table th,
-.inventory-table td {
-    border: 1px solid #e3e6f0;
-    padding: 12px 10px;
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.search-input:focus {
+    border-color: var(--primary-color);
 }
 
-.inventory-table th {
-    background: #e0e7ff;
-    color: #4e73df;
-    font-size: 1rem;
-    font-weight: 700;
-    border-bottom: 2px solid #c7d2fe;
-    position: sticky;
-    top: 0;
-}
-
-.inventory-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.inventory-table tr:hover {
-    background: #2cb8cb;
-    transition: background 0.2s;
-}
-
-.inventory-table td.highlight-history {
-    background: #e6ffe6 !important;
-    border-left: 4px solid #4CAF50;
-    font-weight: 600;
-}
-
-.no-updates {
-    text-align: center;
-    padding: 30px;
-    color: #888;
-    font-style: italic;
-    background: #f1f5fb;
-    font-size: 1.1rem;
-    border-radius: 6px;
-}
-
-/* User header styling */
+/* ===== User Info Styles ===== */
 .user-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
 }
 
 .user-name {
-    font-weight: bold;
+    font-weight: 600;
+    color: #fff;
 }
 
 .user-role {
-    color: #666;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.9em;
 }
 
 .user-avatar {
-    width: 35px;
-    height: 35px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background-color: #f0f0f0;
+    background-color: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
 }
 
-/* Dashboard Header */
-.dashboard-header {
-    margin-bottom: 32px;
-    padding-bottom: 12px;
-    border-bottom: 1.5px solid #e3e6f0;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.welcome-message {
-    font-size: 2rem;
-    color: #4e73df;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-/* Mobile responsive styles */
+/* ===== Responsive Styles ===== */
 @media screen and (max-width: 768px) {
     .main-content {
         margin-left: 0;
-        padding: 15px;
+        padding: 10px;
     }
     
     .dashboard-container {
-        padding: 15px;
+        padding: 10px;
     }
     
     .stats-container {
         grid-template-columns: 1fr;
+        margin-bottom: 32px;
+    }
+    
+    .stat-card {
+        padding: 24px 12px;
+    }
+    
+    .stat-card-title {
+        font-size: 1.1rem;
+        gap: 10px;
+    }
+    
+    .stat-card-title i {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card-number {
+        font-size: 2.2rem;
+    }
+    
+    .updates-section {
+        padding: 12px 4px;
+    }
+    
+    .inventory-table {
+        min-width: 600px;
+        font-size: 0.93rem;
+    }
+    
+    .inventory-table th, 
+    .inventory-table td {
+        padding: 10px 6px;
     }
 }
 
@@ -325,8 +366,17 @@ header {
     .dashboard-container {
         padding: 12px 4px;
     }
+    
     .stat-card {
-        padding: 18px 10px 14px 10px;
+        padding: 20px 16px;
+    }
+    
+    .updates-section {
+        padding: 24px 16px;
+    }
+    
+    .inventory-table {
+        min-width: 700px;
     }
 }
 
@@ -334,12 +384,38 @@ header {
     .dashboard-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 12px;
     }
+    
     .stat-card {
-        padding: 12px 6px 10px 6px;
+        padding: 12px 6px;
     }
+    
     .updates-section {
-        padding: 10px 2px 8px 2px;
+        padding: 8px 2px;
+    }
+    
+    .welcome-message {
+        font-size: 1.2rem;
+    }
+    
+    .welcome-message i {
+        font-size: 1.2rem;
+    }
+    
+    .inventory-table {
+        min-width: 350px;
+        font-size: 0.89rem;
+    }
+    
+    .inventory-table th, 
+    .inventory-table td {
+        padding: 7px 3px;
+    }
+}
+
+@media (max-width: 400px) {
+    .inventory-table {
+        min-width: 350px;
     }
 }

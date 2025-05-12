@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 02:09 AM
+-- Generation Time: May 10, 2025 at 07:12 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -67,6 +67,7 @@ CREATE TABLE `tblcomputer` (
   `computer_No` int(11) NOT NULL,
   `department` varchar(50) NOT NULL,
   `user` varchar(50) NOT NULL,
+  `Machine_type` varchar(50) NOT NULL,
   `computer_name` varchar(50) NOT NULL,
   `ip` varchar(50) NOT NULL,
   `processor` varchar(50) NOT NULL,
@@ -75,32 +76,36 @@ CREATE TABLE `tblcomputer` (
   `ram` varchar(50) NOT NULL,
   `SSD` varchar(50) NOT NULL,
   `OS` varchar(50) NOT NULL,
+  `MAC_Address` varchar(255) NOT NULL,
   `deployment_date` date DEFAULT NULL,
   `last_updated` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  `date_added` timestamp NOT NULL DEFAULT current_timestamp()
+  `date_added` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_active` enum('Y','N') NOT NULL DEFAULT 'Y',
+  `status_changed_by` varchar(255) DEFAULT NULL,
+  `status_changed_date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tblcomputer`
 --
 
-INSERT INTO `tblcomputer` (`computer_No`, `department`, `user`, `computer_name`, `ip`, `processor`, `MOBO`, `power_supply`, `ram`, `SSD`, `OS`, `deployment_date`, `last_updated`, `date_added`) VALUES
-(1, 'ACCTG', 'JEZarandona', 'LENOVO_LAPTOP11', '192.168.1.23', 'Intel Core i7-8265 CPU @ 1.80GHz', 'xda', 'x', 'DDR4 16GB', 'SSD M.2 500GB', 'Windows 10 Pro 64-bit', NULL, '2025-05-08 00:01:55', '2025-04-27 06:07:16'),
-(2, 'ACCTG', 'Mfinsigne', 'LENOVO_WKS01', '192.168.1.21', 'Intel Core i5-6500 CPU @ 3.20GHz', 'Lenovo IB250MH', 'Huntkey 180W', 'Samsung DDR3 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', NULL, '2025-05-06 04:10:04', '2025-04-27 06:07:16'),
-(3, 'ACCTG', 'JFCapistrano', 'LENOVO_WKS02', '192.168.1.22', 'Intel Core i5-6500 CPU @ 3.20Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Ramaxel DDR3 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 03:37:39'),
-(4, 'BCAM', 'MBPornea', 'DELL_LAPTOP01', '192.168.1.25', 'Intel Core i5-8365U CPU', 'x', 'x', 'Fury DDR4 16GB', '250GB SSD M.2', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 03:37:39'),
-(5, 'BCAM', 'BTGamboa', 'LENOVO_WKS03', '192.168.1.26', 'Intel Core i5-6500 CPU @ 3.20Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Kingston DDR4 8GB', 'Samsung SSD 500GB', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 03:40:24'),
-(6, 'BCAM', 'CAHolgado', 'LENOVO_WKS16', '192.168.1.27', 'Intel Core i5-7500 CPU @ 3.40Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Kingston DDR4 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 03:40:24'),
-(7, 'BD', 'JPFrance', 'LENOVO_LAPTOP11', '192.168.1.32', 'Intel Core i5-8265 CPU @ 1.80Ghz', 'x', 'x', 'DDR4 8GB', 'SSD 233GB', 'Windows 10 Pro 64-bit', NULL, '2025-05-07 02:02:00', '2025-05-06 03:54:49'),
-(8, 'BD', 'LLBelan', 'LENOVO_LAPTOP03', '192.168.1.33', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR4 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 03:54:49'),
-(9, 'BD', 'JAVerian', 'LENOVO_LAPTOP08', '192.168.1.30', '192.168.1.30', 'x', 'x', 'DDR4 8GB', 'HIKSEMI 500GB SSD', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 03:57:20'),
-(10, 'BD', 'KVRico', 'LENOVO_LAPTOP06', '192.168.1.31', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR4 8GB', 'SSD 1TB', 'Windows 10 Pro 64-bit', NULL, '2025-05-07 01:51:08', '2025-05-06 03:57:20'),
-(11, 'BD', 'JBLibrojo', 'PROD_LAPTOP02', '192.168.1.34', 'Intel Core i3-1115G4 CPU @ 3000GHz', 'x', 'x', 'DDR4 16GB', 'SSD M.2 250GB', 'Windows 10 Pro 64-bit', NULL, '2025-05-06 08:03:03', '2025-05-06 04:16:56'),
-(12, 'BMS', 'RMSantiago', 'LENOVO_LAPTOP05', '192.168.1.36', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR4 8GB', 'HIKSEMI 500GB SSD', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 04:16:56'),
-(13, 'BMS', 'ACVanguardia', 'LENOVO_WKS07', '192.168.1.37', 'Intel Core i5-7500 CPU @ 3.40Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Samsung DDR3 8GB', 'HIKSEMI 512GB SSD', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 04:22:22'),
-(14, 'EMD', 'GBCarpena', 'LENOVO_LAPTOP04', '192.168.1.127', '', '', '', '', '', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 04:22:22'),
-(15, 'EMD', 'RCBautista', 'ACER_LAPTOP04', '192.168.1.45', 'Intel Core i3-7100 CPU @ 2.40GHz', 'x', 'x', 'DDR4 4GB', 'Samsung SSD 500GB', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 07:13:26'),
-(16, 'EMD', 'ALYanogacio', 'ACER_LAPTOP03', '192.168.1.42', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR3L SDRAM 4GB', 'HDD 1TB', 'Windows 10 Pro 64-bit', NULL, NULL, '2025-05-06 07:31:48');
+INSERT INTO `tblcomputer` (`computer_No`, `department`, `user`, `Machine_type`, `computer_name`, `ip`, `processor`, `MOBO`, `power_supply`, `ram`, `SSD`, `OS`, `MAC_Address`, `deployment_date`, `last_updated`, `date_added`, `is_active`, `status_changed_by`, `status_changed_date`) VALUES
+(1, 'ACCTG', 'JEZarandona', '', 'LENOVO_LAPTOP11', '192.168.1.23', 'Intel Core i7-8265 CPU @ 1.80GHz', 'xda', 'x', 'DDR4 16GB', 'SSD M.2 500GB', 'Windows 10 Pro 64-bit', '', NULL, '2025-05-08 00:01:55', '2025-04-27 06:07:16', 'Y', NULL, NULL),
+(2, 'ACCTG', 'Mfinsigne', '', 'LENOVO_WKS01', '192.168.1.21', 'Intel Core i5-6500 CPU @ 3.20GHz', 'Lenovo IB250MH', 'Huntkey 180W', 'Samsung DDR3 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', '', NULL, '2025-05-06 04:10:04', '2025-04-27 06:07:16', 'Y', NULL, NULL),
+(3, 'ACCTG', 'JFCapistrano', '', 'LENOVO_WKS02', '192.168.1.22', 'Intel Core i5-6500 CPU @ 3.20Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Ramaxel DDR3 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 03:37:39', 'Y', NULL, NULL),
+(4, 'BCAM', 'MBPornea', '', 'DELL_LAPTOP01', '192.168.1.25', 'Intel Core i5-8365U CPU', 'x', 'x', 'Fury DDR4 16GB', '250GB SSD M.2', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 03:37:39', 'Y', NULL, NULL),
+(5, 'BCAM', 'BTGamboa', '', 'LENOVO_WKS03', '192.168.1.26', 'Intel Core i5-6500 CPU @ 3.20Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Kingston DDR4 8GB', 'Samsung SSD 500GB', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 03:40:24', 'Y', NULL, NULL),
+(6, 'BCAM', 'CAHolgado', '', 'LENOVO_WKS16', '192.168.1.27', 'Intel Core i5-7500 CPU @ 3.40Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Kingston DDR4 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 03:40:24', 'Y', NULL, NULL),
+(7, 'BD', 'JPFrance', '', 'LENOVO_LAPTOP11', '192.168.1.32', 'Intel Core i5-8265 CPU @ 1.80Ghz', 'x', 'x', 'DDR4 8GB', 'SSD 233GB', 'Windows 10 Pro 64-bit', '', NULL, '2025-05-07 02:02:00', '2025-05-06 03:54:49', 'Y', NULL, NULL),
+(8, 'BD', 'LLBelan', '', 'LENOVO_LAPTOP03', '192.168.1.33', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR4 8GB', 'Samsung SSD 250GB', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 03:54:49', 'Y', NULL, NULL),
+(9, 'BD', 'JAVerian', '', 'LENOVO_LAPTOP08', '192.168.1.30', '192.168.1.30', 'x', 'x', 'DDR4 8GB', 'HIKSEMI 500GB SSD', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 03:57:20', 'Y', NULL, NULL),
+(10, 'BD', 'KVRico', '', 'LENOVO_LAPTOP06', '192.168.1.31', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR4 8GB', 'SSD 1TB', 'Windows 10 Pro 64-bit', '', NULL, '2025-05-07 01:51:08', '2025-05-06 03:57:20', 'Y', NULL, NULL),
+(11, 'BD', 'JBLibrojo', '', 'PROD_LAPTOP02', '192.168.1.34', 'Intel Core i3-1115G4 CPU @ 3000GHz', 'x', 'x', 'DDR4 16GB', 'SSD M.2 250GB', 'Windows 10 Pro 64-bit', '', NULL, '2025-05-06 08:03:03', '2025-05-06 04:16:56', 'Y', NULL, NULL),
+(12, 'BMS', 'RMSantiago', '', 'LENOVO_LAPTOP05', '192.168.1.36', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR4 8GB', 'HIKSEMI 500GB SSD', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 04:16:56', 'Y', NULL, NULL),
+(13, 'BMS', 'ACVanguardia', '', 'LENOVO_WKS07', '192.168.1.37', 'Intel Core i5-7500 CPU @ 3.40Ghz', 'Lenovo IB250MH', 'Huntkey 180W', 'Samsung DDR3 8GB', 'HIKSEMI 512GB SSD', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 04:22:22', 'Y', NULL, NULL),
+(14, 'EMD', 'GBCarpena', '', 'LENOVO_LAPTOP04', '192.168.1.127', '', '', '', '', '', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 04:22:22', 'Y', NULL, NULL),
+(15, 'EMD', 'RCBautista', '', 'ACER_LAPTOP04', '192.168.1.45', 'Intel Core i3-7100 CPU @ 2.40GHz', 'x', 'x', 'DDR4 4GB', 'Samsung SSD 500GB', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 07:13:26', 'Y', NULL, NULL),
+(16, 'EMD', 'ALYanogacio', '', 'ACER_LAPTOP03', '192.168.1.42', 'Intel Core i5-8250U CPU @ 1.60GHz', 'x', 'x', 'DDR3L SDRAM 4GB', 'HDD 1TB', 'Windows 10 Pro 64-bit', '', NULL, NULL, '2025-05-06 07:31:48', 'Y', NULL, NULL);
 
 -- --------------------------------------------------------
 

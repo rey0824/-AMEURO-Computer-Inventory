@@ -32,7 +32,7 @@ function getComputerById($conn_mysqli, $id) {
         return null;
     }
 
-    $sql = "SELECT computer_No, department, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date, last_updated
+    $sql = "SELECT computer_No, department, machine_type, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date, last_updated
             FROM tblcomputer
             WHERE computer_No = ?";
 
@@ -62,27 +62,32 @@ function getComputerById($conn_mysqli, $id) {
  * @return array - List of recently updated computers
  */
 function getRecentlyUpdatedComputers($conn_mysqli) {
-    // Get the 10 most recently updated computers
-    $sql = "SELECT computer_No, department, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date, last_updated,
-            DATE_FORMAT(last_updated, '%Y-%m-%d %H:%i:%s') as formatted_time
-            FROM tblcomputer 
-            WHERE last_updated IS NOT NULL 
-            ORDER BY last_updated DESC 
+    // Optimized query to get computers and their latest history in a single query
+    $sql = "SELECT c.*, 
+            DATE_FORMAT(c.last_updated, '%m-%d-%y %H:%i:%s') as formatted_time,
+            h.previous_data, h.new_data
+            FROM tblcomputer c
+            LEFT JOIN (
+                SELECT computer_No, previous_data, new_data
+                FROM tblcomputer_history h1
+                WHERE timestamp = (
+                    SELECT MAX(timestamp)
+                    FROM tblcomputer_history h2
+                    WHERE h2.computer_No = h1.computer_No
+                )
+            ) h ON c.computer_No = h.computer_No
+            WHERE c.last_updated IS NOT NULL 
+            ORDER BY c.last_updated DESC 
             LIMIT 10";
+            
     $computers = [];
     try {
         $result = $conn_mysqli->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                // Fetch the latest history for this computer
-                $historySql = "SELECT previous_data, new_data FROM tblcomputer_history WHERE computer_No = ? ORDER BY timestamp DESC LIMIT 1";
-                $historyStmt = $conn_mysqli->prepare($historySql);
-                $historyStmt->bind_param('i', $row['computer_No']);
-                $historyStmt->execute();
-                $historyResult = $historyStmt->get_result();
-                $history = $historyResult->fetch_assoc();
-                $row['history_previous'] = $history ? json_decode($history['previous_data'], true) : null;
-                $row['history_new'] = $history ? json_decode($history['new_data'], true) : null;
+                $row['history_previous'] = $row['previous_data'] ? json_decode($row['previous_data'], true) : null;
+                $row['history_new'] = $row['new_data'] ? json_decode($row['new_data'], true) : null;
+                unset($row['previous_data'], $row['new_data']);
                 $computers[] = $row;
             }
         }
@@ -157,6 +162,42 @@ function getMostRecentUpdates($conn_mysqli) {
     } catch (mysqli_sql_exception $e) {
         error_log("Database error in getMostRecentUpdates (mysqli): " . $e->getMessage());
         return [];
+    }
+}
+
+// Optimized function to get all dashboard stats in a single query
+function getDashboardStats($conn_mysqli) {
+    $sql = "SELECT 
+            (SELECT COUNT(*) FROM tblcomputer) as total_computers,
+            (SELECT COUNT(*) FROM tbemployee) as total_users,
+            (SELECT MAX(last_updated) FROM tblcomputer) as latest_computer_update,
+            (SELECT MAX(timestamp) FROM tblcomputer_history) as latest_history_update";
+            
+    try {
+        $result = $conn_mysqli->query($sql);
+        if ($result) {
+            $stats = $result->fetch_assoc();
+            return [
+                'total_computers' => (int)$stats['total_computers'],
+                'total_users' => (int)$stats['total_users'],
+                'latest_computer_update' => $stats['latest_computer_update'],
+                'latest_history_update' => $stats['latest_history_update']
+            ];
+        }
+        return [
+            'total_computers' => 0,
+            'total_users' => 0,
+            'latest_computer_update' => null,
+            'latest_history_update' => null
+        ];
+    } catch (mysqli_sql_exception $e) {
+        error_log("Database error in getDashboardStats (mysqli): " . $e->getMessage());
+        return [
+            'total_computers' => 0,
+            'total_users' => 0,
+            'latest_computer_update' => null,
+            'latest_history_update' => null
+        ];
     }
 }
 ?>
