@@ -1,0 +1,26 @@
+[13-May-2025 03:39:24 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:40) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:39:24 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:40) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:39:25 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:40) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:42:49 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:40) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:07 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:07 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:25 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:26 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:26 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:26 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 03:56:27 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:46) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:10 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:11 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:11 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:12 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:12 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:12 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:13 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:13 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:13 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:14 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:14 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:14 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 04:01:14 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
+[13-May-2025 14:32:22 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:36:14 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161

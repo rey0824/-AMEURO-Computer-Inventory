@@ -33,7 +33,7 @@ function sanitize_input($data) {
 
 // Check if user is logged in
 function is_logged_in() {
-    return isset($_SESSION['emp_ID']);
+    return isset($_SESSION['emp_ID']) || (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true);
 }
 
 // Redirect to a different URL

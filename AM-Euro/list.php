@@ -246,10 +246,10 @@ require_login();
     <!-- History Modal -->
     <div id="historyModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header" style="position: relative;">
-                <span class="close">&times;</span>
+            <div class="modal-header">
                 <h2>Computer History</h2>
                 <span id="historyTimestamp" class="history-timestamp-header"></span>
+                <span class="close">&times;</span>
             </div>
             <div class="history-content">
                 <div class="history-timeline">
@@ -268,7 +268,11 @@ require_login();
                     </div>
                 </div>
                 <div class="history-changes">
-                    <?php foreach ($history['changes'] as $field => $change): ?>
+                    <?php
+                    if (!isset($history) || !isset($history['changes']) || !is_array($history['changes'])) {
+                        $history['changes'] = [];
+                    }
+                    foreach ($history['changes'] as $field => $change): ?>
                         <div class="change-item">
                             <strong><?php echo ucfirst(str_replace('_', ' ', $field)); ?>:</strong>
                             <span class="old-value"><?php echo htmlspecialchars($change['old']); ?></span>
@@ -313,6 +317,8 @@ require_login();
 
 
     <div class="modal-overlay"></div>
+    <!-- Include html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="JS/list.js"></script>
 </body>
 </html>

@@ -235,6 +235,25 @@ header {
     color: #256029;
 }
 
+.inventory-table tr.highlight-update {
+    background-color: #e6ffe6 !important;
+    transition: background-color 1.5s ease;
+    border-left: 4px solid #4CAF50;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        background-color: #e6ffe6;
+    }
+    50% {
+        background-color: #d0ffd0;
+    }
+    100% {
+        background-color: #e6ffe6;
+    }
+}
+
 /* ===== Form Styles ===== */
 .form-container {
     background-color: #ffffff;

@@ -117,20 +117,67 @@ function createTableRow(computerData, formattedDate, previousData) {
     let rowHtml = `<td>${computerData.computer_No || computerData.id}</td>`;
     
     fields.forEach(field => {
-        let value = computerData[field] || '';
+        let value = '';
         let highlight = '';
         
+        // Handle different field name casing between backend responses
+        if (field === 'machine_type') {
+            // Check for all possible case variations of machine_type
+            value = computerData[field] || computerData['Machine_type'] || computerData['MACHINE_TYPE'] || computerData['machine_Type'] || '';
+            // If still empty, try to find it by iterating through all keys case-insensitively
+            if (!value) {
+                for (let key in computerData) {
+                    if (key.toLowerCase() === 'machine_type') {
+                        value = computerData[key];
+                        break;
+                    }
+                }
+            }
+        } else if (field === 'MOBO') {
+            value = computerData[field] || computerData['mobo'] || '';
+        } else if (field === 'SSD') {
+            value = computerData[field] || computerData['ssd'] || '';
+        } else if (field === 'OS') {
+            value = computerData[field] || computerData['os'] || '';
+        } else {
+            value = computerData[field] || '';
+        }
+        
         if (previousData && typeof previousData === 'object') {
-            const prevValue = previousData[field] || '';
+            let prevValue = '';
+            
+            // Handle different field name casing for previous data too
             if (field === 'machine_type') {
-                if (prevValue.toLowerCase() !== value.toLowerCase()) {
+                prevValue = previousData[field] || previousData['Machine_type'] || previousData['MACHINE_TYPE'] || previousData['machine_Type'] || '';
+                // If still empty, try to find it by iterating through all keys case-insensitively
+                if (!prevValue) {
+                    for (let key in previousData) {
+                        if (key.toLowerCase() === 'machine_type') {
+                            prevValue = previousData[key];
+                            break;
+                        }
+                    }
+                }
+                if (prevValue && value && prevValue.toLowerCase() !== value.toLowerCase()) {
                     highlight = ' class="highlight-history"';
                 }
-                value = value.charAt(0).toUpperCase() + value.slice(1);
-            } else if (prevValue !== value) {
-                highlight = ' class="highlight-history"';
+                // Make sure to capitalize the first letter of machine type
+                value = value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
+            } else if (field === 'MOBO') {
+                prevValue = previousData[field] || previousData['mobo'] || '';
+                if (prevValue !== value) highlight = ' class="highlight-history"';
+            } else if (field === 'SSD') {
+                prevValue = previousData[field] || previousData['ssd'] || '';
+                if (prevValue !== value) highlight = ' class="highlight-history"';
+            } else if (field === 'OS') {
+                prevValue = previousData[field] || previousData['os'] || '';
+                if (prevValue !== value) highlight = ' class="highlight-history"';
+            } else {
+                prevValue = previousData[field] || '';
+                if (prevValue !== value) highlight = ' class="highlight-history"';
             }
-        } else if (field === 'machine_type') {
+        } else if (field === 'machine_type' && value) {
+            // Always capitalize machine type first letter
             value = value.charAt(0).toUpperCase() + value.slice(1);
         }
         
@@ -197,8 +244,87 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
     
+    // Check for recent updates from list page
+    const lastUpdatedComputer = localStorage.getItem('lastUpdatedComputer');
+    const lastUpdateTime = localStorage.getItem('lastUpdateTime');
+    
+    if (lastUpdatedComputer && lastUpdateTime) {
+        // Only show updates that happened in the last 5 minutes
+        const updateTime = new Date(lastUpdateTime);
+        const now = new Date();
+        const timeDiff = (now - updateTime) / 1000 / 60; // difference in minutes
+        
+        if (timeDiff < 5) {
+            fetchAndDisplayRecentUpdate(lastUpdatedComputer);
+        }
+    }
+    
+    // Listen for real-time updates from the list page
+    window.addEventListener('computer-updated', function(event) {
+        if (event.detail && event.detail.computerId) {
+            fetchAndDisplayRecentUpdate(event.detail.computerId);
+        }
+    });
+    
     // Initialize department filter if present
     if (document.getElementById('departmentFilter')) {
         populateDepartmentFilter();
     }
 });
+
+/**
+ * Fetches and displays the most recent update in the dashboard
+ * @param {number} computerId - ID of the computer that was updated
+ */
+function fetchAndDisplayRecentUpdate(computerId) {
+    // Fetch the updated computer data
+    fetch(`dashbackend.php?action=get_computer&id=${computerId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && !data.error) {
+                // Get the user who made the update from localStorage
+                const updatedBy = localStorage.getItem('lastUpdateUser') || 'Unknown';
+                const updateTime = localStorage.getItem('lastUpdateTime') 
+                    ? new Date(localStorage.getItem('lastUpdateTime')).toLocaleString() 
+                    : new Date().toLocaleString();
+                
+                // Update the dashboard activity section
+                updateDashboardActivity(data, updatedBy, updateTime);
+                
+                // Highlight the row in the table
+                highlightUpdatedRow(computerId);
+            }
+        })
+        .catch(error => console.error('Error fetching updated computer:', error));
+}
+
+/**
+ * Highlights a row in the dashboard table
+ * @param {number} computerId - ID of the computer to highlight
+ */
+function highlightUpdatedRow(computerId) {
+    const rows = document.querySelectorAll('#inventoryTableBody tr');
+    let targetRow = null;
+    
+    // Find the row with the matching computer ID
+    for (const row of rows) {
+        const idCell = row.cells[0];
+        if (idCell && idCell.textContent == computerId) {
+            targetRow = row;
+            break;
+        }
+    }
+    
+    if (targetRow) {
+        // Add highlight class to the row
+        targetRow.classList.add('highlight-update');
+        
+        // Scroll to the row if it's not visible
+        targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Remove highlight after 10 seconds
+        setTimeout(() => {
+            targetRow.classList.remove('highlight-update');
+        }, 10000);
+    }
+}

@@ -62,10 +62,45 @@ function getComputerById($conn_mysqli, $id) {
  * @return array - List of recently updated computers
  */
 function getRecentlyUpdatedComputers($conn_mysqli) {
+    // First, let's check the actual column name for machine_type in the database
+    $checkColumnQuery = "SHOW COLUMNS FROM tblcomputer LIKE '%machine%'"; 
+    $machineTypeColumn = 'machine_type'; // Default column name
+    
+    try {
+        $columnResult = $conn_mysqli->query($checkColumnQuery);
+        if ($columnResult && $columnResult->num_rows > 0) {
+            while ($column = $columnResult->fetch_assoc()) {
+                if (strtolower($column['Field']) === 'machine_type') {
+                    $machineTypeColumn = $column['Field']; // Get the exact column name with correct case
+                    break;
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // If there's an error, we'll continue with the default column name
+        error_log("Error checking machine_type column: " . $e->getMessage());
+    }
+    
     // Optimized query to get computers and their latest history in a single query
-    $sql = "SELECT c.*, 
+    // Use a simpler query that explicitly selects all needed fields
+    $sql = "SELECT 
+            c.computer_No, 
+            c.department, 
+            c.machine_type, 
+            c.Machine_type, 
+            c.user, 
+            c.computer_name, 
+            c.ip, 
+            c.processor, 
+            c.MOBO, 
+            c.power_supply, 
+            c.ram, 
+            c.SSD, 
+            c.OS, 
+            c.last_updated, 
             DATE_FORMAT(c.last_updated, '%m-%d-%y %H:%i:%s') as formatted_time,
-            h.previous_data, h.new_data
+            h.previous_data, 
+            h.new_data
             FROM tblcomputer c
             LEFT JOIN (
                 SELECT computer_No, previous_data, new_data
@@ -84,10 +119,40 @@ function getRecentlyUpdatedComputers($conn_mysqli) {
     try {
         $result = $conn_mysqli->query($sql);
         if ($result) {
+            // Debug: Log the column names from the first row
+            if ($result->num_rows > 0) {
+                $firstRow = $result->fetch_assoc();
+                error_log("Column names in tblcomputer: " . implode(", ", array_keys($firstRow)));
+                
+                // Reset the result pointer
+                $result->data_seek(0);
+            }
+            
             while ($row = $result->fetch_assoc()) {
                 $row['history_previous'] = $row['previous_data'] ? json_decode($row['previous_data'], true) : null;
                 $row['history_new'] = $row['new_data'] ? json_decode($row['new_data'], true) : null;
                 unset($row['previous_data'], $row['new_data']);
+                
+                // Debug: Log the machine type value for each row
+                error_log("Row ID: " . $row['computer_No'] . " - Machine type values: " . 
+                    "machine_type=" . ($row['machine_type'] ?? 'NULL') . ", " . 
+                    "Machine_type=" . ($row['Machine_type'] ?? 'NULL'));
+                
+                // Force machine_type to be set with the correct case
+                $machineTypeFound = false;
+                foreach ($row as $key => $value) {
+                    if (strtolower($key) === 'machine_type') {
+                        $row['machine_type'] = $value;
+                        $machineTypeFound = true;
+                        break;
+                    }
+                }
+                
+                // If machine_type wasn't found, set a default value
+                if (!$machineTypeFound) {
+                    $row['machine_type'] = 'Unknown';
+                }
+                
                 $computers[] = $row;
             }
         }

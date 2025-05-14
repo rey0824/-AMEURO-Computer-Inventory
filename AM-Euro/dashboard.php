@@ -5,6 +5,29 @@ require_once 'dashbackend.php';
 
 // Fetch dashboard stats and recent activity
 $recentComputers = getRecentlyUpdatedComputers($conn);
+
+// Debug: Check the structure of the first computer to ensure machine_type exists
+if (!empty($recentComputers)) {
+    // Force machine_type to be set for all computers
+    foreach ($recentComputers as &$computer) {
+        // Check if machine_type exists in any case variation
+        $machineTypeFound = false;
+        foreach ($computer as $key => $value) {
+            if (strtolower($key) === 'machine_type') {
+                $computer['machine_type'] = $value;
+                $machineTypeFound = true;
+                break;
+            }
+        }
+        
+        // If machine_type wasn't found, set a default value
+        if (!$machineTypeFound) {
+            $computer['machine_type'] = 'Unknown';
+        }
+    }
+    unset($computer); // Break the reference
+}
+
 $stats = getDashboardStats($conn);
 
 $totalComputers = $stats['total_computers'];
@@ -131,13 +154,39 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                         <?php foreach ($fields as $field): ?>
                                             <?php 
                                             if ($field === 'machine_type') {
-                                                $prevVal = isset($prev[$field]) ? strtolower($prev[$field]) : null;
-                                                $currVal = isset($curr[$field]) ? strtolower($curr[$field]) : null;
-                                                $changed = isset($prevVal, $currVal) && $prevVal !== $currVal;
-                                                $displayVal = isset($curr[$field]) ? ucfirst(strtolower($curr[$field])) : (isset($computer[$field]) ? ucfirst(strtolower($computer[$field])) : '');
+                                                // First try to get the value from Machine_type (capital M) as this might be the actual column name
+                                                if (isset($computer['Machine_type']) && !empty($computer['Machine_type'])) {
+                                                    $displayVal = ucfirst(strtolower($computer['Machine_type']));
+                                                }
+                                                // Then try lowercase machine_type
+                                                elseif (isset($computer['machine_type']) && !empty($computer['machine_type'])) {
+                                                    $displayVal = ucfirst(strtolower($computer['machine_type']));
+                                                }
+                                                // Check history data if available
+                                                elseif (isset($curr['Machine_type']) && !empty($curr['Machine_type'])) {
+                                                    $displayVal = ucfirst(strtolower($curr['Machine_type']));
+                                                }
+                                                elseif (isset($curr['machine_type']) && !empty($curr['machine_type'])) {
+                                                    $displayVal = ucfirst(strtolower($curr['machine_type']));
+                                                }
+                                                // If still not found, set a default value
+                                                else {
+                                                    $displayVal = 'Unknown';
+                                                }
+                                                
+                                                // For comparison with previous data
+                                                $prevVal = null;
+                                                if (isset($prev['Machine_type'])) {
+                                                    $prevVal = strtolower($prev['Machine_type']);
+                                                } elseif (isset($prev['machine_type'])) {
+                                                    $prevVal = strtolower($prev['machine_type']);
+                                                }
+                                                
+                                                $currVal = strtolower($displayVal);
+                                                $changed = $prevVal !== null && $currVal !== $prevVal;
                                             } else {
                                                 $changed = isset($prev[$field]) && isset($curr[$field]) && $prev[$field] !== $curr[$field];
-                                                $displayVal = $curr[$field] ?? $computer[$field];
+                                                $displayVal = $curr[$field] ?? $computer[$field] ?? '';
                                             }
                                             $titleAttr = (!empty($displayVal)) ? ' title="' . htmlspecialchars($displayVal) . '"' : '';
                                             ?>

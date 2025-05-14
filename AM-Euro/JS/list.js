@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editCommentGroup = document.getElementById('editCommentGroup');
     const editComment = document.getElementById('editComment');
     const paginationBar = document.getElementById('pagination');
-    let selectedRow = null, lastUpdatedRow = null, currentPage = 1, totalPages = 1;
+    let selectedRow = null, lastUpdatedRow = null, currentPage = 1, totalPages = 1, highlightTimeoutId = null;
 
     // Updates the enabled/disabled state of action buttons based on row selection
     function updateButtonStates() {
@@ -441,50 +441,165 @@ document.addEventListener('DOMContentLoaded', function() {
     function highlightUpdatedRow(computerId) {
         const row = document.querySelector(`tr[data-id="${computerId}"]`);
         if (row) {
-            if (lastUpdatedRow) lastUpdatedRow.classList.remove('highlight-update');
+            // Remove highlight from previously highlighted row if exists
+            if (lastUpdatedRow) {
+                lastUpdatedRow.classList.remove('highlight-update');
+                // Clear any existing timeout for the previous row
+                if (highlightTimeoutId) {
+                    clearTimeout(highlightTimeoutId);
+                }
+            }
+            
+            // Add highlight to the updated row
             row.classList.add('highlight-update');
             lastUpdatedRow = row;
+            
+            // Scroll to the updated row
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Set a timeout to remove the highlight after 10 seconds
+            highlightTimeoutId = setTimeout(() => {
+                row.classList.remove('highlight-update');
+                lastUpdatedRow = null;
+            }, 10000); // 10 seconds
+            
+            // Notify the dashboard about the update if it's open in another tab
+            notifyDashboardOfUpdate(computerId);
         }
+    }
+    
+    // Notifies the dashboard about an update
+    function notifyDashboardOfUpdate(computerId) {
+        // Store the updated computer ID in localStorage so the dashboard can pick it up
+        localStorage.setItem('lastUpdatedComputer', computerId);
+        localStorage.setItem('lastUpdateTime', new Date().toISOString());
+        
+        // Also store the current user for the dashboard to display
+        const currentUser = document.querySelector('.user-name')?.textContent || 'Unknown';
+        localStorage.setItem('lastUpdateUser', currentUser);
+        
+        // Dispatch a custom event that the dashboard can listen for if it's open
+        const updateEvent = new CustomEvent('computer-updated', { 
+            detail: { computerId: computerId }
+        });
+        window.dispatchEvent(updateEvent);
     }
 
     // Updates the table body with new computer data
     function updateTable(computers) {
         const tbody = computersTable.querySelector('tbody');
         tbody.innerHTML = '';
+        
         if (!computers || computers.length === 0) {
             tbody.innerHTML = '<tr><td colspan="14" class="no-data">No computers found</td></tr>';
             return;
         }
-        // Remove MAC_Address and insert status column in its place
-        const fields = ['department','Machine_type','user','computer_name','ip','processor','MOBO','power_supply','ram','SSD','OS','is_active'];
+
         computers.forEach(computer => {
-            if (!computer || !computer.computer_No) return;
             const row = document.createElement('tr');
             row.dataset.id = computer.computer_No;
-            let html = `<td>${computer.computer_No}</td>`;
-            const prev = computer.history_previous || {};
-            const curr = computer.history_new || computer;
-            fields.forEach(field => {
-                let changed = false;
-                if (computer.history_previous && computer.history_new) {
-                    changed = String(prev[field] ?? '') !== String(curr[field] ?? '');
-                }
-                let value = curr[field] !== undefined && curr[field] !== null ? curr[field] : (computer[field] || '');
-                if (field === 'Machine_type' && value) {
-                    value = value.charAt(0).toUpperCase() + value.slice(1);
-                }
-                if (field === 'is_active') {
-                    value = value === 'Y' ? 'Active' : 'Inactive';
-                    html += `<td><span class="${value === 'Active' ? 'status-active' : 'status-inactive'}">${value}</span></td>`;
-                } else {
-                    html += `<td${changed ? ' class="highlight-history"' : ''}>${value}</td>`;
-                }
-            });
-            html += `<td>${computer.formatted_date || computer.last_updated || 'N/A'}</td>`;
-            row.innerHTML = html;
+            
+            const status = computer.is_active === 'Y' ? 'Active' : 'Inactive';
+            const formattedDate = computer.formatted_date || new Date(computer.last_updated).toLocaleString() || 'N/A';
+            
+            row.innerHTML = `
+                <td>${computer.computer_No}</td>
+                <td>${computer.department || ''}</td>
+                <td>${(computer.Machine_type || '').charAt(0).toUpperCase() + (computer.Machine_type || '').slice(1)}</td>
+                <td>${computer.user || ''}</td>
+                <td>${computer.computer_name || ''}</td>
+                <td>${computer.ip || ''}</td>
+                <td>${computer.processor || ''}</td>
+                <td>${computer.MOBO || ''}</td>
+                <td>${computer.power_supply || ''}</td>
+                <td>${computer.ram || ''}</td>
+                <td>${computer.SSD || ''}</td>
+                <td>${computer.OS || ''}</td>
+                <td><span class="status-${status.toLowerCase()}">${status}</span></td>
+                <td>${formattedDate}</td>
+            `;
+            
             tbody.appendChild(row);
         });
+        
+        // Update button states after table refresh
+        updateButtonStates();
+    }
+
+    // Fetches and displays computer data based on current filters
+    async function refreshTable() {
+        const tbody = computersTable.querySelector('tbody');
+        
+        // Show loading indicator
+        tbody.innerHTML = '<tr><td colspan="14" class="loading">Loading data...</td></tr>';
+        
+        try {
+            const searchQuery = searchInput.value.trim();
+            const department = departmentFilter.value;
+            const fromDate = lastUpdatedFrom.value;
+            const toDate = lastUpdatedTo.value;
+            
+            console.log('Fetching data with filters:', {
+                search: searchQuery,
+                department: department,
+                fromDate: fromDate,
+                toDate: toDate,
+                page: currentPage
+            });
+            
+            const formData = new FormData();
+            formData.append('action', 'list');
+            formData.append('page', currentPage);
+            formData.append('limit', 10);
+            formData.append('search', searchQuery);
+            formData.append('department', department);
+            formData.append('last_updated_from', fromDate);
+            formData.append('last_updated_to', toDate);
+            
+            const response = await fetch('listbackend.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            // Check for HTTP errors
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the raw text first for debugging
+            const responseText = await response.text();
+            
+            // Try to parse as JSON
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse JSON response:', responseText);
+                throw new Error(`Invalid JSON response: ${parseError.message}`);
+            }
+            
+            // Check for API success flag
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to fetch data');
+            }
+            
+            // Make sure computers array exists
+            if (!data.computers || !Array.isArray(data.computers)) {
+                console.error('Invalid data structure:', data);
+                throw new Error('Server returned invalid data structure');
+            }
+            
+            console.log('Data fetched successfully:', data);
+            
+            // Update table with new data
+            updateTable(data.computers);
+            totalPages = data.pages || 1;
+            renderPagination(currentPage, totalPages, data.total);
+            
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            tbody.innerHTML = `<tr><td colspan="14" class="error">Error loading data: ${error.message}</td></tr>`;
+        }
     }
 
     // Formats a field name from snake_case to Title Case for display
@@ -589,8 +704,65 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handles printing the table only
-    const printBtn = document.getElementById('printTableBtn');
-    if (printBtn) printBtn.onclick = e => { e.preventDefault(); window.print(); };
+    const exportBtn = document.getElementById('printTableBtn');
+    if (exportBtn) {
+        // Update button text to reflect new functionality (optional)
+        exportBtn.textContent = 'Export as PDF';
+        
+        exportBtn.onclick = e => {
+            e.preventDefault();
+            
+            // Get the table element to export
+            const tableElement = document.querySelector('table'); // Adjust selector if needed
+            
+            // Configure PDF options for complete table display
+            const options = {
+                margin: [5, 5, 5, 5],  // Smaller margins [top, right, bottom, left]
+                filename: 'computer-inventory.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a3', // Larger paper size
+                    orientation: 'landscape',
+                    compress: true,
+                    precision: 2,
+                    text: {
+                        fontSize: 12,
+                        font: 'helvetica',
+                        lineHeight: 1.5,
+                        textOverflow: 'ellipsis'
+                    }
+                }
+            };
+            
+            // Show loading indicator
+            const originalText = exportBtn.textContent;
+            exportBtn.textContent = 'Generating PDF...';
+            exportBtn.disabled = true;
+            
+            // Generate and download the PDF
+            html2pdf()
+                .from(tableElement)
+                .set(options)
+                .save()
+                .then(() => {
+                    // Restore button state
+                    exportBtn.textContent = originalText;
+                    exportBtn.disabled = false;
+                })
+                .catch(err => {
+                    console.error('PDF generation error:', err);
+                    exportBtn.textContent = originalText;
+                    exportBtn.disabled = false;
+                });
+        };
+    }
 
     // Initial UI setup
     updateButtonStates();
