@@ -24,3 +24,150 @@
 [13-May-2025 04:01:14 Europe/Berlin] PHP Fatal error:  Cannot redeclare sanitize_input() (previously declared in C:\xampp\htdocs\AM-Euro\listbackend.php:61) in C:\xampp\htdocs\AM-Euro\DB.php on line 31
 [13-May-2025 14:32:22 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
 [13-May-2025 14:36:14 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:46:43 Europe/Berlin] SQL Query: SELECT 
+                computer_No, department, Machine_type, user, computer_name, 
+                ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, 
+                deployment_date, last_updated, is_active
+                FROM tblcomputer 
+                 
+                ORDER BY computer_No ASC LIMIT ? OFFSET ?
+[13-May-2025 14:46:43 Europe/Berlin] All Records: false
+[13-May-2025 14:46:43 Europe/Berlin] Parameter count: 2
+[13-May-2025 14:46:46 Europe/Berlin] SQL Query: SELECT 
+                computer_No, department, Machine_type, user, computer_name, 
+                ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, 
+                deployment_date, last_updated, is_active
+                FROM tblcomputer 
+                 
+                ORDER BY computer_No ASC
+[13-May-2025 14:46:46 Europe/Berlin] All Records: true
+[13-May-2025 14:46:46 Europe/Berlin] Parameter count: 0
+[13-May-2025 14:48:54 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:48:56 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:57:23 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:59:02 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:59:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 14:59:43 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:08:51 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:10:02 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:13:47 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:14:15 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:14:34 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:15:03 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:15:11 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:15:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:25:14 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:25:33 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:25:52 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:26:01 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:26:06 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:27:30 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:27:42 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:27:45 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:29:58 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:30:03 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:39:33 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 15:46:00 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:03:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:11:19 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:11:24 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:16:32 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:19:31 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:21:59 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:22:30 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:22:33 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:22:38 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:23:21 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:23:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:37:39 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:37:59 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:38:05 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:44:04 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:44:08 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:44:11 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:44:15 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:44:27 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:44:31 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:45:04 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:45:06 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:45:22 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:45:43 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:49:09 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:52:24 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:52:26 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:52:28 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:54:57 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:15 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:18 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:31 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:33 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:37 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:39 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:41 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:43 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:45 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:50 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:54 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:55:57 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:56:00 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:56:43 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:57:05 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:57:31 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:57:48 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:57:54 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:58:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:59:08 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 16:59:10 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:03:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:04:11 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:04:41 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:04:45 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:04:53 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:04:56 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:05:52 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:05:58 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:06:10 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:27 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:28 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:38 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:40 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:12:42 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:14:00 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:15:01 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:15:15 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:16:48 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:16:50 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:17:02 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:17:06 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:17:06 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:22:24 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:22:29 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:22:48 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:22:52 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:23:52 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 17:27:03 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:50:22 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:50:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:50:32 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:50:37 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:50:41 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:52:17 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:53:13 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:53:23 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:53:27 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:53:31 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:53:33 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:53:34 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:55:05 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:58:25 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 19:59:27 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:01:49 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:02:41 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:02:45 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:03:45 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:04:19 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:04:21 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:04:30 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161
+[13-May-2025 20:05:06 Europe/Berlin] PHP Warning:  Undefined variable $allRecords in C:\xampp\htdocs\AM-Euro\listbackend.php on line 161

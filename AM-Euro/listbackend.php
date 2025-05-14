@@ -453,10 +453,18 @@ function updateComputer() {
         
         if ($stmt->execute()) {
             $conn->commit();
+            // Identify changed fields for frontend highlighting
+            $changedFields = [];
+            foreach ($fields as $field) {
+                if ($changes['previous'][$field] != $changes['new'][$field]) {
+                    $changedFields[] = $field;
+                }
+            }
             echo json_encode([
-                'success' => true, 
+                'success' => true,
                 'message' => 'Computer updated successfully',
-                'id' => $id
+                'id' => $id,
+                'changedFields' => $changedFields
             ]);
         } else {
             throw new Exception('Failed to update computer: ' . $conn->error);
@@ -472,7 +480,7 @@ function updateComputer() {
     }
 }
 
-// Deactivate a computer (set is_active to 'N')
+// Toggle computer active status (between 'Y' and 'N')
 function deactivateComputer() {
     global $conn;
     try {
@@ -497,9 +505,12 @@ function deactivateComputer() {
         
         $currentData = $result->fetch_assoc();
         
-        // Create new data with is_active set to 'N'
+        // Toggle is_active status (Y -> N or N -> Y)
+        $newStatus = ($currentData['is_active'] === 'Y') ? 'N' : 'Y';
+        
+        // Create new data with toggled is_active status
         $newData = $currentData;
-        $newData['is_active'] = 'N';
+        $newData['is_active'] = $newStatus;
         $newData['status_changed_by'] = isset($_SESSION['username']) ? $_SESSION['username'] : 'Unknown';
         $newData['status_changed_date'] = date('Y-m-d H:i:s');
         
@@ -517,16 +528,17 @@ function deactivateComputer() {
         $historyStmt->bind_param('issss', $id, $jsonPrevious, $jsonNew, $updatedBy, $comment);
         $historyStmt->execute();
         
-        // Update the computer record
-        $sql = "UPDATE tblcomputer SET is_active = 'N', status_changed_by = ?, status_changed_date = NOW(), last_updated = NOW() WHERE computer_No = ?";
+        // Update the computer record with the new status
+        $sql = "UPDATE tblcomputer SET is_active = ?, status_changed_by = ?, status_changed_date = NOW(), last_updated = NOW() WHERE computer_No = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('si', $updatedBy, $id);
+        $stmt->bind_param('ssi', $newStatus, $updatedBy, $id);
         
         if ($stmt->execute()) {
             $conn->commit();
             echo json_encode([
                 'success' => true,
-                'message' => 'Computer deactivated successfully'
+                'message' => ($newStatus === 'Y') ? 'Computer activated successfully' : 'Computer deactivated successfully',
+                'new_status' => $newStatus
             ]);
         } else {
             throw new Exception('Failed to deactivate computer: ' . $conn->error);

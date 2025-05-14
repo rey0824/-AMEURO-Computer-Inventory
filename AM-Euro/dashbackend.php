@@ -14,7 +14,8 @@ require_once(__DIR__ . '/DB.php');
 // AJAX handler for getting a single computer record
 if (isset($_GET['action']) && $_GET['action'] === 'get_computer' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
-    $computer = getComputerById($conn, $id);
+    $includeHistory = isset($_GET['include_history']) && $_GET['include_history'] == 1;
+    $computer = getComputerById($conn, $id, $includeHistory);
     header('Content-Type: application/json');
     echo json_encode($computer ? $computer : ['error' => 'Computer not found']);
     exit;
@@ -24,15 +25,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_computer' && isset($_GET[
  * Get a single computer by ID
  * @param mysqli $conn_mysqli - Database connection
  * @param int $id - Computer ID to fetch
+ * @param bool $includeHistory - Whether to include history information
  * @return array|null - Computer data or null if not found
  */
-function getComputerById($conn_mysqli, $id) {
+function getComputerById($conn_mysqli, $id, $includeHistory = false) {
     $id = intval($id);
     if ($id <= 0) {
         return null;
     }
 
-    $sql = "SELECT computer_No, department, machine_type, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date, last_updated
+    $sql = "SELECT computer_No, department, machine_type, Machine_type, user, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, deployment_date, last_updated
             FROM tblcomputer
             WHERE computer_No = ?";
 
@@ -49,6 +51,37 @@ function getComputerById($conn_mysqli, $id) {
         
         $data = $result->fetch_assoc();
         $stmt->close();
+        
+        // Add history data if requested
+        if ($includeHistory) {
+            // Get the most recent history entry for this computer
+            $historySql = "SELECT h.*, c.comment_text 
+                           FROM tblcomputer_history h
+                           LEFT JOIN tblchange_comments c ON h.history_id = c.history_id
+                           WHERE h.computer_id = ? 
+                           ORDER BY h.timestamp DESC 
+                           LIMIT 1";
+            
+            $historyStmt = $conn_mysqli->prepare($historySql);
+            $historyStmt->bind_param('i', $id);
+            $historyStmt->execute();
+            $historyResult = $historyStmt->get_result();
+            
+            if ($historyResult && $historyResult->num_rows > 0) {
+                $historyData = $historyResult->fetch_assoc();
+                
+                // Add history data to the computer record
+                if (!empty($historyData['previous_data']) && !empty($historyData['new_data'])) {
+                    $data['history_previous'] = json_decode($historyData['previous_data'], true);
+                    $data['history_new'] = json_decode($historyData['new_data'], true);
+                    $data['history_timestamp'] = $historyData['timestamp'];
+                    $data['history_updated_by'] = $historyData['updated_by'];
+                    $data['history_comment'] = $historyData['comment_text'] ?? '';
+                }
+            }
+            $historyStmt->close();
+        }
+        
         return $data;
     } catch (mysqli_sql_exception $e) {
         error_log("Database error in getComputerById (mysqli): " . $e->getMessage());

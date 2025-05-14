@@ -246,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 console.log('Operation successful');
                 closeModal(computerModal);
-                refreshTable();
-                if (data.id || computerId) highlightUpdatedRow(data.id || computerId);
+                // Pass the computer ID to refreshTable to highlight it after refresh
+                refreshTable(data.id || computerId);
             } else {
                 console.error('Operation failed:', data.message);
                 alert('Error: ' + data.message);
@@ -437,34 +437,155 @@ document.addEventListener('DOMContentLoaded', function() {
         currDiv.innerHTML = currentHtml;
     }
 
-    // Highlights the row of a recently updated computer
-    function highlightUpdatedRow(computerId) {
+    // Highlights only the specific cells that were changed in a recently updated computer
+    async function highlightUpdatedRow(computerId) {
         const row = document.querySelector(`tr[data-id="${computerId}"]`);
-        if (row) {
-            // Remove highlight from previously highlighted row if exists
-            if (lastUpdatedRow) {
-                lastUpdatedRow.classList.remove('highlight-update');
-                // Clear any existing timeout for the previous row
-                if (highlightTimeoutId) {
-                    clearTimeout(highlightTimeoutId);
+        if (!row) return;
+        
+        // Clear previous highlights
+        clearPreviousHighlights();
+        
+        // Store this row as the last updated row (but don't add highlight-update class)
+        lastUpdatedRow = row;
+        
+        try {
+            // Fetch the history data to identify changed fields
+            const response = await fetch('listbackend.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `action=getHistory&id=${computerId}`
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.history && data.history.length > 0) {
+                // Get the most recent history entry
+                const latestChange = data.history[0]; // Already sorted by timestamp DESC from server
+                const changes = latestChange.changes;
+                
+                // Highlight only the changed cells
+                highlightChangedCells(row, changes);
+                
+                // Store the highlight information in localStorage
+                saveHighlightToStorage(computerId, changes);
+            }
+        } catch (error) {
+            console.error('Error fetching history for highlighting:', error);
+        }
+        
+        // Scroll to the updated row
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Notify the dashboard about the update if it's open in another tab
+        notifyDashboardOfUpdate(computerId);
+    }
+    
+    // Helper function to clear previous highlights
+    function clearPreviousHighlights() {
+        if (highlightTimeoutId) {
+            clearTimeout(highlightTimeoutId);
+        }
+        
+        if (lastUpdatedRow) {
+            // Only clear cell highlights, not the entire row
+            lastUpdatedRow.querySelectorAll('.highlight-cell-change').forEach(cell => {
+                cell.classList.remove('highlight-cell-change');
+                cell.style.fontWeight = 'normal';
+                // Remove the checkmark tooltip
+                if (cell.dataset.changed) {
+                    delete cell.dataset.changed;
+                    delete cell.dataset.oldValue;
+                    delete cell.dataset.newValue;
+                }
+            });
+            lastUpdatedRow = null;
+        }
+    }
+    
+    // Save highlight information to localStorage
+    function saveHighlightToStorage(computerId, changes) {
+        // Get current highlights or initialize empty object
+        const storedHighlights = JSON.parse(localStorage.getItem('highlightedChanges') || '{}');
+        
+        // Add this computer's changes
+        storedHighlights[computerId] = {
+            timestamp: Date.now(),
+            changes: changes
+        };
+        
+        // Save back to localStorage
+        localStorage.setItem('highlightedChanges', JSON.stringify(storedHighlights));
+    }
+    
+    // Load and apply highlights from localStorage
+    function loadHighlightsFromStorage() {
+        const storedHighlights = JSON.parse(localStorage.getItem('highlightedChanges') || '{}');
+        const currentTime = Date.now();
+        const ONE_WEEK = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds - extended from 1 day
+        const updatedHighlights = {};
+        
+        // Apply highlights for each stored computer ID
+        Object.keys(storedHighlights).forEach(computerId => {
+            const highlightData = storedHighlights[computerId];
+            
+            // Only apply highlights that are less than one week old
+            if (currentTime - highlightData.timestamp < ONE_WEEK) {
+                const row = document.querySelector(`tr[data-id="${computerId}"]`);
+                if (row) {
+                    // Only apply cell highlights, not row highlight
+                    highlightChangedCells(row, highlightData.changes);
+                    
+                    // Keep this highlight in storage
+                    updatedHighlights[computerId] = highlightData;
                 }
             }
-            
-            // Add highlight to the updated row
-            row.classList.add('highlight-update');
-            lastUpdatedRow = row;
-            
-            // Scroll to the updated row
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Set a timeout to remove the highlight after 10 seconds
-            highlightTimeoutId = setTimeout(() => {
-                row.classList.remove('highlight-update');
-                lastUpdatedRow = null;
-            }, 10000); // 10 seconds
-            
-            // Notify the dashboard about the update if it's open in another tab
-            notifyDashboardOfUpdate(computerId);
+        });
+        
+        // Update localStorage with only the valid highlights
+        localStorage.setItem('highlightedChanges', JSON.stringify(updatedHighlights));
+    }
+    
+    // Helper function to highlight changed cells
+    function highlightChangedCells(row, changes) {
+        const fieldToColumnMap = {
+            'computer_No': 0,
+            'department': 1,
+            'Machine_type': 2,
+            'user': 3,
+            'computer_name': 4,
+            'ip': 5,
+            'processor': 6,
+            'MOBO': 7,
+            'power_supply': 8,
+            'ram': 9,
+            'SSD': 10,
+            'OS': 11,
+            'is_active': 12
+        };
+        
+        // Find which fields were changed
+        for (const field in fieldToColumnMap) {
+            if (changes.previous && changes.new && 
+                changes.previous[field] !== changes.new[field]) {
+                
+                const columnIndex = fieldToColumnMap[field];
+                const cell = row.cells[columnIndex];
+                
+                if (cell) {
+                    // Add highlight class
+                    cell.classList.add('highlight-cell-change');
+                    
+                    // Add a tooltip to show the change
+                    const oldValue = changes.previous[field] || '(empty)';
+                    const newValue = changes.new[field] || '(empty)';
+                    cell.title = `Changed from: ${oldValue} → ${newValue}`;
+                    
+                    // Add a data attribute to mark this cell as changed
+                    cell.dataset.changed = 'true';
+                    cell.dataset.oldValue = oldValue;
+                    cell.dataset.newValue = newValue;
+                }
+            }
         }
     }
     
@@ -486,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Updates the table body with new computer data
-    function updateTable(computers) {
+    function updateTable(computers, changedFields = {}) {
         const tbody = computersTable.querySelector('tbody');
         tbody.innerHTML = '';
         
@@ -495,12 +616,46 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Get current time to check for recent updates (within the last hour)
+        const currentTime = new Date();
+        const oneHourAgo = new Date(currentTime - 60 * 60 * 1000); // 1 hour in milliseconds
+        
         computers.forEach(computer => {
             const row = document.createElement('tr');
             row.dataset.id = computer.computer_No;
             
             const status = computer.is_active === 'Y' ? 'Active' : 'Inactive';
             const formattedDate = computer.formatted_date || new Date(computer.last_updated).toLocaleString() || 'N/A';
+            
+            // Check if this is a recently updated record
+            const lastUpdated = new Date(computer.last_updated);
+            const isRecentlyUpdated = lastUpdated > oneHourAgo;
+            
+            // Apply highlight class if recently updated
+            if (isRecentlyUpdated) {
+                row.classList.add('highlight-update');
+            }
+            
+            // Check if this is the computer with changed fields
+            const hasChangedFields = changedFields.computerId === computer.computer_No && changedFields.fields && changedFields.fields.length > 0;
+            
+            // Map field names to column indices
+            const fieldToColumnMap = {
+                'computer_No': 0,
+                'department': 1,
+                'Machine_type': 2,
+                'user': 3,
+                'computer_name': 4,
+                'ip': 5,
+                'processor': 6,
+                'MOBO': 7,
+                'power_supply': 8,
+                'ram': 9,
+                'SSD': 10,
+                'OS': 11,
+                'is_active': 12
+                // last_updated is not included as it always changes
+            };
             
             row.innerHTML = `
                 <td>${computer.computer_No}</td>
@@ -520,6 +675,19 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             tbody.appendChild(row);
+            
+            // If this row has changed fields, highlight the specific cells
+            if (hasChangedFields) {
+                changedFields.fields.forEach(field => {
+                    const columnIndex = fieldToColumnMap[field];
+                    if (columnIndex !== undefined) {
+                        const cell = row.cells[columnIndex];
+                        if (cell) {
+                            cell.classList.add('highlight-cell-change');
+                        }
+                    }
+                });
+            }
         });
         
         // Update button states after table refresh
@@ -527,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Fetches and displays computer data based on current filters
-    async function refreshTable() {
+    async function refreshTable(highlightId = null) {
         const tbody = computersTable.querySelector('tbody');
         
         // Show loading indicator
@@ -595,6 +763,12 @@ document.addEventListener('DOMContentLoaded', function() {
             updateTable(data.computers);
             totalPages = data.pages || 1;
             renderPagination(currentPage, totalPages, data.total);
+            
+            // If a specific computer ID was provided to highlight, apply the highlighting
+            if (highlightId) {
+                // Since highlightUpdatedRow is now async, we need to await it
+                await highlightUpdatedRow(highlightId);
+            }
             
         } catch (error) {
             console.error('Error fetching data:', error);

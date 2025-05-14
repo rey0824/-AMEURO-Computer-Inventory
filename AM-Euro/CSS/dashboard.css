@@ -42,6 +42,7 @@ body {
 }
 
 .container {
+    background: linear-gradient(120deg, #49a5e3 0%, #f4f6f9 100%);
     max-width: 700px;
     margin: 0 auto;
     padding: 10px;
@@ -92,7 +93,7 @@ header {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
+    background: linear-gradient(135deg, #49a5e3 0%, #4e73df 100%);
     border-radius: 20px;
     box-shadow: 0 6px 28px rgba(51, 204, 255, 0.13);
     padding: 40px 32px;
@@ -230,28 +231,11 @@ header {
 
 .inventory-table td.highlight-history {
     background: var(--accent-light) !important;
-    border-left: 4px solid var(--secondary-color);
+    border-bottom: 2px solid var(--secondary-color);
     font-weight: 600;
     color: #256029;
-}
-
-.inventory-table tr.highlight-update {
-    background-color: #e6ffe6 !important;
-    transition: background-color 1.5s ease;
-    border-left: 4px solid #4CAF50;
-    animation: pulse-green 2s infinite;
-}
-
-@keyframes pulse-green {
-    0% {
-        background-color: #e6ffe6;
-    }
-    50% {
-        background-color: #d0ffd0;
-    }
-    100% {
-        background-color: #e6ffe6;
-    }
+    position: relative;
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
 }
 
 /* ===== Form Styles ===== */
@@ -430,6 +414,12 @@ header {
     .inventory-table th, 
     .inventory-table td {
         padding: 7px 3px;
+    }
+}
+
+@media (max-width: 400px) {
+    .inventory-table {
+        min-width: 350px;
     }
 }
 

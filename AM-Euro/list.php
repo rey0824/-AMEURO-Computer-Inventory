@@ -147,19 +147,7 @@ require_login();
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="department">Department</label>
-                            <select id="department" name="department">
-                                <option value="">Select Department</option>
-                                <?php
-                                $departmentSql = "SELECT DISTINCT department FROM tblcomputer ORDER BY department";
-                                $departmentResult = $conn->query($departmentSql);
-                                if ($departmentResult && $departmentResult->num_rows > 0) {
-                                    while($deptRow = $departmentResult->fetch_assoc()) {
-                                        $dept = htmlspecialchars($deptRow["department"]);
-                                        echo "<option value='$dept'>$dept</option>";
-                                    }
-                                }
-                                ?>
-                            </select>
+                            <input type="text" id="department" name="department">
                         </div>
                         
                         <div class="form-group">
@@ -274,9 +262,9 @@ require_login();
                     }
                     foreach ($history['changes'] as $field => $change): ?>
                         <div class="change-item">
-                            <strong><?php echo ucfirst(str_replace('_', ' ', $field)); ?>:</strong>
+                            <strong><?php echo ucfirst(str_replace('_', ' ', $field)); ?></strong>
                             <span class="old-value"><?php echo htmlspecialchars($change['old']); ?></span>
-                            <i class="fas fa-arrow-right"></i>
+                            <span class="change-arrow">→</span>
                             <span class="new-value"><?php echo htmlspecialchars($change['new']); ?></span>
                         </div>
                     <?php endforeach; ?>

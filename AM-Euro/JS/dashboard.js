@@ -24,9 +24,8 @@ Element.prototype.findElementsWithText = function(targetText) {
  * @param {Object} computerData - Updated computer data
  * @param {string} updatedBy - Username of updater
  * @param {string} updateTime - Timestamp of update
- * @param {Object} previousData - Previous computer data (optional)
  */
-function updateDashboardActivity(computerData, updatedBy, updateTime, previousData = null) {
+function updateDashboardActivity(computerData, updatedBy, updateTime) {
     const statsContainer = document.querySelector('.stats-container');
     if (!statsContainer) return;
     
@@ -35,7 +34,7 @@ function updateDashboardActivity(computerData, updatedBy, updateTime, previousDa
         new Date().toLocaleString();
     
     updateActivityCard(statsContainer, formattedDate, updatedBy);
-    updateActivityTable(computerData, formattedDate, previousData);
+    updateActivityTable(computerData, formattedDate);
 }
 
 /**
@@ -70,9 +69,8 @@ function updateActivityCard(container, date, user) {
  * Updates the activity table with latest computer data
  * @param {Object} computerData - Updated computer data
  * @param {string} formattedDate - Formatted date string
- * @param {Object} previousData - Previous computer data (optional)
  */
-function updateActivityTable(computerData, formattedDate, previousData) {
+function updateActivityTable(computerData, formattedDate) {
     const tbody = document.getElementById('inventoryTableBody');
     if (!tbody) return;
     
@@ -83,7 +81,7 @@ function updateActivityTable(computerData, formattedDate, previousData) {
     }
     
     // Create and insert new row
-    const newRow = createTableRow(computerData, formattedDate, previousData);
+    const newRow = createTableRow(computerData, formattedDate);
     if (tbody.firstChild) {
         tbody.insertBefore(newRow, tbody.firstChild);
     } else {
@@ -104,21 +102,60 @@ function updateActivityTable(computerData, formattedDate, previousData) {
  * Creates a new table row for the activity table
  * @param {Object} computerData - Computer data
  * @param {string} formattedDate - Formatted date string
- * @param {Object} previousData - Previous computer data (optional)
  * @returns {Element} New table row element
  */
-function createTableRow(computerData, formattedDate, previousData) {
+function createTableRow(computerData, formattedDate) {
     const fields = [
         'department', 'machine_type', 'user', 'computer_name', 'ip', 'processor',
         'MOBO', 'power_supply', 'ram', 'SSD', 'OS'
     ];
     
     const newRow = document.createElement('tr');
-    let rowHtml = `<td>${computerData.computer_No || computerData.id}</td>`;
+    newRow.dataset.id = computerData.computer_No || computerData.id;
     
+    // Add ID cell
+    const idCell = document.createElement('td');
+    idCell.textContent = computerData.computer_No || computerData.id;
+    newRow.appendChild(idCell);
+    
+    // Check for changed fields if history data is available
+    const changedFields = new Set();
+    if (computerData.history_previous && computerData.history_new) {
+        const prev = computerData.history_previous;
+        const curr = computerData.history_new;
+        
+        // Identify which fields have changed
+        for (const field of fields) {
+            let prevValue, currValue;
+            
+            // Handle case variations
+            if (field === 'machine_type') {
+                prevValue = prev['Machine_type'] || prev['machine_type'] || '';
+                currValue = curr['Machine_type'] || curr['machine_type'] || '';
+            } else if (field === 'MOBO') {
+                prevValue = prev['MOBO'] || prev['mobo'] || '';
+                currValue = curr['MOBO'] || curr['mobo'] || '';
+            } else if (field === 'SSD') {
+                prevValue = prev['SSD'] || prev['ssd'] || '';
+                currValue = curr['SSD'] || curr['ssd'] || '';
+            } else if (field === 'OS') {
+                prevValue = prev['OS'] || prev['os'] || '';
+                currValue = curr['OS'] || curr['os'] || '';
+            } else {
+                prevValue = prev[field] || '';
+                currValue = curr[field] || '';
+            }
+            
+            // If values differ, mark as changed
+            if (prevValue !== currValue) {
+                changedFields.add(field);
+            }
+        }
+    }
+    
+    // Add all other cells
     fields.forEach(field => {
         let value = '';
-        let highlight = '';
         
         // Handle different field name casing between backend responses
         if (field === 'machine_type') {
@@ -133,6 +170,8 @@ function createTableRow(computerData, formattedDate, previousData) {
                     }
                 }
             }
+            // Make sure to capitalize the first letter of machine type
+            value = value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
         } else if (field === 'MOBO') {
             value = computerData[field] || computerData['mobo'] || '';
         } else if (field === 'SSD') {
@@ -143,49 +182,49 @@ function createTableRow(computerData, formattedDate, previousData) {
             value = computerData[field] || '';
         }
         
-        if (previousData && typeof previousData === 'object') {
-            let prevValue = '';
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        
+        // Apply highlight to changed cells
+        if (changedFields.has(field)) {
+            cell.classList.add('highlight-history');
             
-            // Handle different field name casing for previous data too
-            if (field === 'machine_type') {
-                prevValue = previousData[field] || previousData['Machine_type'] || previousData['MACHINE_TYPE'] || previousData['machine_Type'] || '';
-                // If still empty, try to find it by iterating through all keys case-insensitively
-                if (!prevValue) {
-                    for (let key in previousData) {
-                        if (key.toLowerCase() === 'machine_type') {
-                            prevValue = previousData[key];
-                            break;
-                        }
-                    }
+            // Add tooltip if we have previous and new values
+            if (computerData.history_previous && computerData.history_new) {
+                const prev = computerData.history_previous;
+                const curr = computerData.history_new;
+                
+                let prevValue, currValue;
+                if (field === 'machine_type') {
+                    prevValue = prev['Machine_type'] || prev['machine_type'] || '(empty)';
+                    currValue = curr['Machine_type'] || curr['machine_type'] || '(empty)';
+                } else if (field === 'MOBO') {
+                    prevValue = prev['MOBO'] || prev['mobo'] || '(empty)';
+                    currValue = curr['MOBO'] || curr['mobo'] || '(empty)';
+                } else if (field === 'SSD') {
+                    prevValue = prev['SSD'] || prev['ssd'] || '(empty)';
+                    currValue = curr['SSD'] || curr['ssd'] || '(empty)';
+                } else if (field === 'OS') {
+                    prevValue = prev['OS'] || prev['os'] || '(empty)';
+                    currValue = curr['OS'] || curr['os'] || '(empty)';
+                } else {
+                    prevValue = prev[field] || '(empty)';
+                    currValue = curr[field] || '(empty)';
                 }
-                if (prevValue && value && prevValue.toLowerCase() !== value.toLowerCase()) {
-                    highlight = ' class="highlight-history"';
-                }
-                // Make sure to capitalize the first letter of machine type
-                value = value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
-            } else if (field === 'MOBO') {
-                prevValue = previousData[field] || previousData['mobo'] || '';
-                if (prevValue !== value) highlight = ' class="highlight-history"';
-            } else if (field === 'SSD') {
-                prevValue = previousData[field] || previousData['ssd'] || '';
-                if (prevValue !== value) highlight = ' class="highlight-history"';
-            } else if (field === 'OS') {
-                prevValue = previousData[field] || previousData['os'] || '';
-                if (prevValue !== value) highlight = ' class="highlight-history"';
-            } else {
-                prevValue = previousData[field] || '';
-                if (prevValue !== value) highlight = ' class="highlight-history"';
+                
+                cell.title = `Changed from: ${prevValue} → ${currValue}`;
             }
-        } else if (field === 'machine_type' && value) {
-            // Always capitalize machine type first letter
-            value = value.charAt(0).toUpperCase() + value.slice(1);
         }
         
-        rowHtml += `<td${highlight}>${value}</td>`;
+        newRow.appendChild(cell);
     });
     
-    rowHtml += `<td class="timestamp">${formattedDate}</td>`;
-    newRow.innerHTML = rowHtml;
+    // Add timestamp cell
+    const timeCell = document.createElement('td');
+    timeCell.className = 'timestamp';
+    timeCell.textContent = formattedDate;
+    newRow.appendChild(timeCell);
+    
     return newRow;
 }
 
@@ -277,8 +316,8 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {number} computerId - ID of the computer that was updated
  */
 function fetchAndDisplayRecentUpdate(computerId) {
-    // Fetch the updated computer data
-    fetch(`dashbackend.php?action=get_computer&id=${computerId}`)
+    // Fetch the updated computer data with history information
+    fetch(`dashbackend.php?action=get_computer&id=${computerId}&include_history=1`)
         .then(response => response.json())
         .then(data => {
             if (data && !data.error) {
@@ -288,43 +327,19 @@ function fetchAndDisplayRecentUpdate(computerId) {
                     ? new Date(localStorage.getItem('lastUpdateTime')).toLocaleString() 
                     : new Date().toLocaleString();
                 
+                // Check if we have stored highlight information
+                const storedHighlights = JSON.parse(localStorage.getItem('highlightedChanges') || '{}');
+                if (storedHighlights[computerId] && storedHighlights[computerId].changes) {
+                    // Add history data from stored highlights if not already present
+                    if (!data.history_previous || !data.history_new) {
+                        data.history_previous = storedHighlights[computerId].changes.previous || {};
+                        data.history_new = storedHighlights[computerId].changes.new || {};
+                    }
+                }
+                
                 // Update the dashboard activity section
                 updateDashboardActivity(data, updatedBy, updateTime);
-                
-                // Highlight the row in the table
-                highlightUpdatedRow(computerId);
             }
         })
         .catch(error => console.error('Error fetching updated computer:', error));
-}
-
-/**
- * Highlights a row in the dashboard table
- * @param {number} computerId - ID of the computer to highlight
- */
-function highlightUpdatedRow(computerId) {
-    const rows = document.querySelectorAll('#inventoryTableBody tr');
-    let targetRow = null;
-    
-    // Find the row with the matching computer ID
-    for (const row of rows) {
-        const idCell = row.cells[0];
-        if (idCell && idCell.textContent == computerId) {
-            targetRow = row;
-            break;
-        }
-    }
-    
-    if (targetRow) {
-        // Add highlight class to the row
-        targetRow.classList.add('highlight-update');
-        
-        // Scroll to the row if it's not visible
-        targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Remove highlight after 10 seconds
-        setTimeout(() => {
-            targetRow.classList.remove('highlight-update');
-        }, 10000);
-    }
 }

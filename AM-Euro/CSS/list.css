@@ -28,28 +28,29 @@ body {
     border-left: 4px solid #e74a3b;
 }
 
-/* Highlight for updated rows */
-.highlight-update {
+/* Highlight for specific changed cells */
+.highlight-cell-change {
     background-color: #e6ffe6 !important;
-    transition: background-color 1.5s ease;
-    border-left: 4px solid #4CAF50;
-    animation: pulse-green 2s infinite;
+    position: relative;
+    font-weight: 600;
+    border-bottom: 2px solid #0fe753;
+    box-shadow: 0 0 4px rgba(15, 231, 83, 0.3);
+    transition: all 0.3s ease;
 }
 
-@keyframes pulse-green {
-    0% {
-        background-color: #e6ffe6;
-    }
-    50% {
-        background-color: #d0ffd0;
-    }
-    100% {
-        background-color: #e6ffe6;
-    }
+/* Add a visual indicator for changed cells */
+.highlight-cell-change::after {
+    content: '✓';
+    color: #0fe753;
+    font-weight: bold;
+    font-size: 14px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
 }
 
 .container {
-    background: linear-gradient(120deg, #e0e7ff 0%, #f4f6f9 100%);
+    background: linear-gradient(120deg, #49a5e3 0%, #f4f6f9 100%);
     min-height: 90Fvh;
     padding: 20px 0 0 0; /* Reduced from 40px */
 }

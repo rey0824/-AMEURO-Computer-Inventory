@@ -17,6 +17,7 @@
 }
 
 body {
+    background: linear-gradient(120deg, #49a5e3 0%, #f4f6f9 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--background-color);
     color: var(--text-primary);
