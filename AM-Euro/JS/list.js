@@ -1014,8 +1014,11 @@ document.addEventListener('DOMContentLoaded', function() {
             exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Generating...';
             exportBtn.disabled = true;
             
-            // Open the PDF generator in a new window
-            window.open('export.php?download=1', '_blank');
+            // Get the current status filter value
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            // Open the PDF generator in a new window with status filter
+            window.open(`export-pdf.php?status=${statusFilter}`, '_blank');
             
             // Reset button after a delay
             setTimeout(() => {
