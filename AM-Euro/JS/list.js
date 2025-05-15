@@ -481,19 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fieldGroups = [
             {
                 title: 'Basic Information',
-                fields: ['department', 'Machine_type', 'user', 'computer_name', 'ip']
-            },
-            {
-                title: 'Hardware Specifications',
-                fields: ['processor', 'MOBO', 'power_supply', 'ram', 'SSD']
-            },
-            {
-                title: 'Software & System',
-                fields: ['OS']
-            },
-            {
-                title: 'Asset Information',
-                fields: ['MAC_Address', 'Asset_no', 'deployment_date']
+                fields: ['department', 'Machine_type', 'user', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'Asset_no', 'deployment_date']
             },
             {
                 title: 'Status Information',

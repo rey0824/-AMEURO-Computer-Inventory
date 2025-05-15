@@ -240,7 +240,7 @@ require_login();
 
                         <div class="form-group">
                             <label for="macAddress">MAC Address</label>
-                            <input type="text" id="macAddress" name="MAC_Address" placeholder="XX:XX:XX:XX:XX:XX">
+                            <input type="text" id="macAddress" name="MAC_Address" placeholder="XX:XX:XX:XX:XX:XX" value="">
                         </div>
 
                         <div class="form-group">
