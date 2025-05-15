@@ -125,6 +125,7 @@ function getComputersList() {
         // Get filter parameters
         $search = isset($_POST['search']) && $_POST['search'] !== '' ? '%' . sanitize_input($_POST['search']) . '%' : null;
         $department = isset($_POST['department']) && $_POST['department'] !== '' ? sanitize_input($_POST['department']) : null;
+        $status = isset($_POST['status']) && $_POST['status'] !== '' ? sanitize_input($_POST['status']) : null;
         $lastUpdatedFrom = isset($_POST['last_updated_from']) && $_POST['last_updated_from'] !== '' ? sanitize_input($_POST['last_updated_from']) : null;
         $lastUpdatedTo = isset($_POST['last_updated_to']) && $_POST['last_updated_to'] !== '' ? sanitize_input($_POST['last_updated_to']) : null;
         
@@ -147,6 +148,14 @@ function getComputersList() {
             $types .= 's';
         }
         
+        if ($status !== null) {
+            if ($status === 'active') {
+                $conditions[] = "is_active = 'Y'";
+            } else if ($status === 'inactive') {
+                $conditions[] = "is_active = 'N'";
+            }
+        }
+        
         if ($lastUpdatedFrom !== null && $lastUpdatedTo !== null) {
             $conditions[] = "DATE(last_updated) BETWEEN ? AND ?";
             $params[] = $lastUpdatedFrom;
@@ -163,7 +172,7 @@ function getComputersList() {
             $sql = "SELECT 
                     computer_No, department, Machine_type, user, computer_name, 
                     ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, 
-                    deployment_date, last_updated, is_active
+                    Asset_no, deployment_date, last_updated, is_active
                     FROM tblcomputer 
                     $whereClause 
                     ORDER BY computer_No ASC";
@@ -172,7 +181,7 @@ function getComputersList() {
             $sql = "SELECT 
                     computer_No, department, Machine_type, user, computer_name, 
                     ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, 
-                    deployment_date, last_updated, is_active
+                    Asset_no, deployment_date, last_updated, is_active
                     FROM tblcomputer 
                     $whereClause 
                     ORDER BY computer_No ASC 
@@ -297,7 +306,7 @@ function addComputer() {
     $data = sanitize_all($_POST);
     
     // Set default values for empty fields
-    $fields = ['department', 'user', 'Machine_type', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'deployment_date'];
+    $fields = ['department', 'user', 'Machine_type', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'Asset_no', 'deployment_date'];
     foreach ($fields as $field) {
         if (!isset($data[$field]) || $data[$field] === '') {
             $data[$field] = null;
@@ -314,11 +323,11 @@ function addComputer() {
     }
     
     try {
-        $sql = "INSERT INTO tblcomputer (department, user, Machine_type, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, deployment_date, last_updated) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO tblcomputer (department, user, Machine_type, computer_name, ip, processor, MOBO, power_supply, ram, SSD, OS, MAC_Address, Asset_no, deployment_date, last_updated) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            'sssssssssssss',
+            'ssssssssssssss',
             $data['department'],
             $data['user'],
             $data['Machine_type'],
@@ -331,6 +340,7 @@ function addComputer() {
             $data['SSD'],
             $data['OS'],
             $data['MAC_Address'],
+            $data['Asset_no'],
             $data['deployment_date']
         );
 
@@ -367,7 +377,7 @@ function updateComputer() {
         
         // Set default values for empty fields and handle required fields
         $data = sanitize_all($_POST);
-        $fields = ['department', 'user', 'Machine_type', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'deployment_date'];
+        $fields = ['department', 'user', 'Machine_type', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'Asset_no', 'deployment_date'];
         foreach ($fields as $field) {
             if (!isset($data[$field]) || $data[$field] === '') {
                 $data[$field] = null;
@@ -407,6 +417,7 @@ function updateComputer() {
                 'SSD' => $data['SSD'],
                 'OS' => $data['OS'],
                 'MAC_Address' => $data['MAC_Address'],
+                'Asset_no' => $data['Asset_no'],
                 'deployment_date' => $data['deployment_date']
             ]
         ];
@@ -431,10 +442,10 @@ function updateComputer() {
             $historyStmt->execute();
         }
         
-        $sql = "UPDATE tblcomputer SET department = ?, user = ?, Machine_type = ?, computer_name = ?, ip = ?, processor = ?, MOBO = ?, power_supply = ?, ram = ?, SSD = ?, OS = ?, MAC_Address = ?, deployment_date = ?, last_updated = NOW() WHERE computer_No = ?";
+        $sql = "UPDATE tblcomputer SET department = ?, user = ?, Machine_type = ?, computer_name = ?, ip = ?, processor = ?, MOBO = ?, power_supply = ?, ram = ?, SSD = ?, OS = ?, MAC_Address = ?, Asset_no = ?, deployment_date = ?, last_updated = NOW() WHERE computer_No = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
-            'sssssssssssssi',
+            'ssssssssssssssi',
             $data['department'],
             $data['user'],
             $data['Machine_type'],
@@ -447,6 +458,7 @@ function updateComputer() {
             $data['SSD'],
             $data['OS'],
             $data['MAC_Address'],
+            $data['Asset_no'],
             $data['deployment_date'],
             $id
         );

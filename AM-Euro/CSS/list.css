@@ -6,9 +6,10 @@ styles for the Computer Inventory Management page
 
 /* Base styles */
 body {
-    padding: 20px 0 0 0; /* Reduced from 50px */
+    padding: 10px 0 0 0; /* Further reduced for more space */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f6f9;
+    overflow-x: hidden;
 }
 
 /* Loading and error states */
@@ -51,24 +52,26 @@ body {
 
 .container {
     background: linear-gradient(120deg, #49a5e3 0%, #f4f6f9 100%);
-    min-height: 90Fvh;
-    padding: 20px 0 0 0; /* Reduced from 40px */
+    min-height: 95vh;
+    padding: 10px 0 0 0; /* Further reduced for more space */
+    width: 100%;
 }
 
 .content-wrapper {
     background: #fff;
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(80, 120, 200, 0.10);
-    padding: 32px 32px 24px 32px;
+    padding: 24px 24px 20px 24px;
     margin: 0 auto;
-    max-width: 1400px;
+    max-width: 1800px;
+    width: 95%;
 }
 
 /* Header */
 header {
     background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
     color: white;
-    padding: 36px 20px 24px 20px;
+    padding: 20px 20px 16px 20px;
     border-radius: 12px 12px 0 0;
     margin-bottom: 0;
     box-shadow: 0 2px 8px rgba(51, 204, 255, 0.08);
@@ -85,24 +88,102 @@ header p {
     opacity: 0.93;
 }
 
+/* Section Header */
+.section-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.header-left h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #4e73df;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
 /* Toolbar */
 .toolbar {
     background: #f8f9fc;
     border-radius: 0 0 12px 12px;
     box-shadow: 0 2px 8px rgba(80, 120, 200, 0.06);
     padding: 18px 20px;
-    margin-bottom: 0;
+    margin-bottom: 15px;
     display: flex;
     flex-wrap: wrap;
-    gap: 18px;
+    gap: 20px;
+    justify-content: space-between;
 }
 
-.search-container {
+/* Filter Container */
+.filter-container {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 15px;
     flex: 1;
-    max-width: 600px;
-    align-items: center;
+}
+
+.search-box {
+    position: relative;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+#searchInput {
+    padding-left: 40px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e3e6f0;
+    height: 42px;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+#searchInput:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.15);
+    outline: none;
+}
+
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.filter-item label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #4e5a6a;
+    margin-bottom: 3px;
 }
 
 .search-container input,
@@ -121,56 +202,57 @@ header p {
     outline: none;
 }
 
-/* Modern date range filter styles for .date-range-filter in the toolbar */
+/* Date range filter styles */
 .date-range-filter {
+    min-width: 300px;
+}
+
+.date-inputs {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: #f8f9fc;
-    border-radius: 6px;
-    padding: 4px 10px;
-    margin-left: 10px;
-    box-shadow: 0 1px 4px rgba(80,120,200,0.04);
+    gap: 8px;
 }
-.date-range-filter label {
-    font-size: 0.97em;
-    color: #555;
-    margin: 0 2px 0 0;
-    font-weight: 500;
+
+.date-separator {
+    color: #6c757d;
+    font-size: 0.9rem;
 }
+
 .date-range-filter input[type="date"] {
-    border: 1.5px solid #e3e6f0;
-    border-radius: 4px;
-    padding: 6px 8px;
-    font-size: 1em;
+    border: 1px solid #e3e6f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.95rem;
     background: #fff;
     color: #333;
-    min-width: 120px;
-    transition: border 0.2s;
+    flex: 1;
+    min-width: 130px;
+    transition: all 0.3s ease;
 }
+
 .date-range-filter input[type="date"]:focus {
-    border: 1.5px solid #4e73df;
+    border-color: #4e73df;
     outline: none;
-    box-shadow: 0 0 0 2px #33ccff33;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.15);
 }
-@media (max-width: 900px) {
+
+@media (max-width: 992px) {
     .date-range-filter {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
-        margin-left: 0;
-        padding: 4px 0;
+        min-width: 100%;
     }
-    .date-range-filter label {
-        margin-bottom: 2px;
+    
+    .date-inputs {
+        width: 100%;
     }
 }
 
 /* Action Buttons */
 .action-buttons {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
+    justify-content: flex-end;
+    margin-left: auto;
 }
 
 .action-buttons button {
@@ -178,13 +260,15 @@ header p {
     color: #4e73df;
     border: none;
     border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 1.1rem;
+    padding: 10px 14px;
+    font-size: 1rem;
     transition: all 0.3s ease;
     box-shadow: 0 2px 6px rgba(80, 120, 200, 0.07);
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 6px;
+    min-width: 40px;
 }
 
 .action-buttons button:disabled {
@@ -208,6 +292,67 @@ header p {
 .action-buttons #addComputerBtn:hover {
     background: #06874d;
     color: #fff;
+}
+
+/* Responsive styles for toolbar and buttons */
+@media (max-width: 1200px) {
+    .toolbar {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 992px) {
+    .filter-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-item {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    .header-right {
+        width: 100%;
+    }
+    
+    .header-right #addComputerBtn {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .action-buttons button {
+        flex: 1;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 576px) {
+    .action-buttons {
+        justify-content: center;
+    }
+    
+    .action-buttons button {
+        flex: 0 0 calc(50% - 8px);
+    }
 }
 
 .action-buttons .edit-btn:not(:disabled):hover {
@@ -240,23 +385,23 @@ header p {
 #computersTable {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
-    table-layout: fixed;
+    margin-top: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    background: #fff;
     border-radius: 8px;
     overflow: hidden;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(80, 120, 200, 0.06);
+    table-layout: fixed;
 }
 
 #computersTable th,
 #computersTable td {
-    border: 1px solid #e3e6f0;
-    padding: 12px 10px;
+    padding: 6px 8px;
     text-align: left;
+    border-bottom: 1px solid #e3e6f0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 180px;
+    font-size: 0.9rem;
 }
 
 #computersTable th {
@@ -468,6 +613,13 @@ header p {
     font-weight: 500;
     letter-spacing: 0.02em;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#history-changes {
+    top: 30%;
+    color: #3b454f;
+    font-size: 14px;
+    font-weight: 300;
 }
 
 #historyModal .close {
@@ -723,7 +875,7 @@ header p {
 
 .timeline-date {
     font-size: 0.9em;
-    color: #666;
+    color: #000000;
     margin-bottom: 5px;
 }
 
@@ -735,8 +887,8 @@ header p {
 
 .timeline-comment {
     font-size: 0.9em;
-    color: #666;
-    background: #f5f5f5;
+    color: #000000;
+    background: #99e666;
     padding: 8px 12px;
     border-radius: 4px;
     margin-top: 5px;
@@ -762,7 +914,7 @@ header p {
 .previous-version {
     background: linear-gradient(120deg, #ffeaea 0%, #fff 100%);
     border-radius: 14px;
-    border: 2px solid #ff6b6b;
+    border: 2px solid #da5050;
     padding: 20px 24px;
     margin-bottom: 12px;    
     box-shadow: 0 8px 24px rgba(255, 107, 107, 0.12);
@@ -790,7 +942,7 @@ header p {
 .current-version {
     background: linear-gradient(120deg, #eaffea 0%, #fff 100%);
     border-radius: 14px;
-    border: 2px solid #4cd964;
+    border: 2px solid #36dd52;
     padding: 20px 24px;
     margin-bottom: 12px;
     box-shadow: 0 8px 24px rgba(76, 217, 100, 0.12);
@@ -851,6 +1003,53 @@ header p {
     padding: 2px 8px;
     border-radius: 4px;
     display: inline-block;
+}
+
+/* Status filter styling */
+#statusFilter {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    margin-left: 10px;
+    font-size: 14px;
+    height: 38px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+#statusFilter:hover, #statusFilter:focus {
+    border-color: #80bdff;
+    outline: none;
+}
+
+/* Status indicators */
+.status-active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.status-inactive {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 100px;
+    justify-content: center;
 }
 
 /* Buttons */
@@ -1041,6 +1240,9 @@ header p {
     .table-container {
         overflow-x: auto;
         padding-bottom: 10px;
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
     }
     #computersTable {
         min-width: 900px;

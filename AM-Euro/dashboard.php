@@ -73,6 +73,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <title>Dashboard - AmEuro System</title>
     <link rel="stylesheet" href="CSS/nav.css">
     <link rel="stylesheet" href="CSS/dashboard.css">
+    <link rel="stylesheet" href="CSS/machine-type-popup.css">
+    <link rel="stylesheet" href="CSS/table-highlight.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
@@ -89,7 +91,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </div>
             
             <div class="stats-container" style="margin-bottom: 48px;">
-                <div class="stat-card">
+                <div class="stat-card" id="total-computers-card">
                     <div class="stat-card-title">
                         <i class="fas fa-desktop"></i>Total Computers
                     </div>
@@ -114,7 +116,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
 
-            <div class="updates-section" style="margin-top: 36px;">
+            <div class="updates-section" style="margin-top: 10px;">
                 <div class="section-header">
                     <h2><i class="fas fa-history"></i> Recent Computer Updates</h2>
                 </div>
@@ -123,8 +125,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Department</th>
-                                <th>Machine Type</th>
+                                <th>Dept</th>
+                                <th>Type</th>
                                 <th>User</th>
                                 <th>Comp. Name</th>
                                 <th>IP</th>
@@ -134,6 +136,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 <th>RAM</th>
                                 <th>SSD</th>
                                 <th>OS</th>
+                                <th>Status</th>
                                 <th>Last Updated</th>
                             </tr>
                         </thead>
@@ -148,7 +151,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                         <?php
                                         $prev = $computer['history_previous'] ?? [];
                                         $curr = $computer['history_new'] ?? $computer;
-                                        $fields = ['department','machine_type','user','computer_name','ip','processor','MOBO','power_supply','ram','SSD','OS'];
+                                        $fields = ['department','machine_type','user','computer_name','ip','processor','MOBO','power_supply','ram','SSD','OS','status'];
                                         ?>
                                         <td><?php echo htmlspecialchars($computer['computer_No']); ?></td>
                                         <?php foreach ($fields as $field): ?>
@@ -184,6 +187,32 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                                 
                                                 $currVal = strtolower($displayVal);
                                                 $changed = $prevVal !== null && $currVal !== $prevVal;
+                                            } elseif ($field === 'status') {
+                                                // Handle status field with special styling
+                                                if (isset($computer['status']) && !empty($computer['status'])) {
+                                                    $statusVal = strtolower($computer['status']);
+                                                } elseif (isset($curr['status']) && !empty($curr['status'])) {
+                                                    $statusVal = strtolower($curr['status']);
+                                                } else {
+                                                    $statusVal = 'active'; // Default to active if not specified
+                                                }
+                                                
+                                                $displayVal = ucfirst($statusVal);
+                                                $statusClass = ($statusVal == 'active') ? 'status-active' : 'status-inactive';
+                                                
+                                                // For comparison with previous data
+                                                $prevVal = null;
+                                                if (isset($prev['status'])) {
+                                                    $prevVal = strtolower($prev['status']);
+                                                }
+                                                
+                                                $changed = $prevVal !== null && $statusVal !== $prevVal;
+                                                $class = $changed ? 'highlight-history' : '';
+                                                
+                                                echo '<td class="' . $class . '">';
+                                                echo '<span class="' . $statusClass . '">' . htmlspecialchars($displayVal) . '</span>';
+                                                echo '</td>';
+                                                continue; // Skip the regular output for status field
                                             } else {
                                                 $changed = isset($prev[$field]) && isset($curr[$field]) && $prev[$field] !== $curr[$field];
                                                 $displayVal = $curr[$field] ?? $computer[$field] ?? '';
@@ -198,6 +227,51 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Machine Type Counts Popup Container -->
+    <div id="machine-type-popup" class="machine-type-popup">
+        <div class="machine-type-content">
+            <span class="close-popup">&times;</span>
+            <h2>Computer Types</h2>
+            <div class="machine-type-grid">
+                <div class="machine-type-item">
+                    <i class="fas fa-desktop"></i>
+                    <div class="machine-type-name">Desktop</div>
+                    <div class="machine-type-count" id="desktop-count">0</div>
+                </div>
+                <div class="machine-type-item">
+                    <i class="fas fa-laptop"></i>
+                    <div class="machine-type-name">Laptop</div>
+                    <div class="machine-type-count" id="laptop-count">0</div>
+                </div>
+                <div class="machine-type-item">
+                    <i class="fas fa-server"></i>
+                    <div class="machine-type-name">Server</div>
+                    <div class="machine-type-count" id="server-count">0</div>
+                </div>
+                <div class="machine-type-item">
+                    <i class="fas fa-network-wired"></i>
+                    <div class="machine-type-name">Router</div>
+                    <div class="machine-type-count" id="router-count">0</div>
+                </div>
+                <div class="machine-type-item">
+                    <i class="fas fa-print"></i>
+                    <div class="machine-type-name">Printer</div>
+                    <div class="machine-type-count" id="printer-count">0</div>
+                </div>
+                <div class="machine-type-item">
+                    <i class="fas fa-random"></i>
+                    <div class="machine-type-name">Switch</div>
+                    <div class="machine-type-count" id="switch-count">0</div>
+                </div>
+                <div class="machine-type-item">
+                    <i class="fas fa-question-circle"></i>
+                    <div class="machine-type-name">Other</div>
+                    <div class="machine-type-count" id="other-count">0</div>
                 </div>
             </div>
         </div>

@@ -38,6 +38,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Custom alert function to replace default browser alert
+    function showCustomAlert(message, title = 'Notification', type = 'error') {
+        const alertModal = document.getElementById('alertModal');
+        const alertTitle = document.getElementById('alertTitle');
+        const alertMessage = document.getElementById('alertMessage');
+        const alertIcon = document.querySelector('.alert-icon i');
+        
+        // Set content
+        alertTitle.textContent = title;
+        alertMessage.textContent = message;
+        
+        // Set icon based on alert type
+        alertIcon.className = 'bi';
+        switch(type) {
+            case 'success':
+                alertIcon.classList.add('bi-check-circle');
+                alertIcon.parentElement.className = 'alert-icon alert-success';
+                break;
+            case 'info':
+                alertIcon.classList.add('bi-info-circle');
+                alertIcon.parentElement.className = 'alert-icon alert-info';
+                break;
+            case 'warning':
+                alertIcon.classList.add('bi-exclamation-triangle');
+                alertIcon.parentElement.className = 'alert-icon alert-warning';
+                break;
+            case 'error':
+            default:
+                alertIcon.classList.add('bi-exclamation-circle');
+                alertIcon.parentElement.className = 'alert-icon alert-error';
+                break;
+        }
+        
+        // Show the modal
+        showModal(alertModal);
+        
+        // Event listeners for closing
+        document.querySelector('.close-alert').onclick = () => closeModal(alertModal);
+        document.getElementById('alertOkBtn').onclick = () => closeModal(alertModal);
+    }
+    
     // Sets loading state (disables/enables button and adds/removes loading class)
     const setLoading = (el, loading) => {
         el.classList.toggle('loading', loading);
@@ -84,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const computerForm = document.getElementById('computerForm');
     const searchInput = document.getElementById('searchInput');
     const departmentFilter = document.getElementById('departmentFilter');
+    const statusFilter = document.getElementById('statusFilter');
     const lastUpdatedFrom = document.getElementById('lastUpdatedFrom');
     const lastUpdatedTo = document.getElementById('lastUpdatedTo');
     const computersTable = document.getElementById('computersTable');
@@ -148,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         computerForm.reset();
         document.getElementById('modalTitle').textContent = 'Add New Computer';
         document.getElementById('computerId').value = '';
+        document.getElementById('modalItemId').textContent = '';
         document.getElementById('saveBtn').textContent = 'Add Computer';
         if (editCommentGroup) editCommentGroup.style.display = 'none';
         showModal(computerModal);
@@ -165,8 +208,21 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 const c = data.computer;
+                
+                // Check if the computer is inactive
+                if (c.is_active !== 'Y') {
+                    // Show a custom alert and don't open the edit modal
+                    showCustomAlert(
+                        'Cannot edit inactive computers. Please activate the computer first.', 
+                        'Action Restricted', 
+                        'warning'
+                    );
+                    return;
+                }
+                
                 document.getElementById('modalTitle').textContent = 'Edit Computer';
                 document.getElementById('computerId').value = c.computer_No;
+                document.getElementById('modalItemId').textContent = `ID: ${c.computer_No}`;
                 // Set department dropdown value
                 document.getElementById('department').value = c.department;
                 document.getElementById('machineType').value = c.Machine_type || '';
@@ -179,6 +235,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('ram').value = c.ram;
                 document.getElementById('ssd').value = c.SSD;
                 document.getElementById('os').value = c.OS;
+                document.getElementById('macAddress').value = c.MAC_Address || '';
+                document.getElementById('assetNo').value = c.Asset_no || '';
                 document.getElementById('deploymentDate').value = c.deployment_date || '';
                 document.getElementById('saveBtn').textContent = 'Save Changes';
                 if (editCommentGroup) editCommentGroup.style.display = '';
@@ -353,7 +411,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const currDiv = document.querySelector('.current-version .version-details');
         const timestampSpan = document.getElementById('historyTimestamp');
 
-        
         // Clear previous content
         timelineContainer.innerHTML = '';
         prevDiv.innerHTML = '';
@@ -369,6 +426,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const timelineEntry = document.createElement('div');
             timelineEntry.className = 'timeline-entry';
+            
+            // Determine if this is a status change or regular update
+            const isStatusChange = entry.changes && 
+                                  entry.changes.previous && 
+                                  entry.changes.new && 
+                                  entry.changes.previous.is_active !== entry.changes.new.is_active;
+            
             timelineEntry.innerHTML = `
                 <div class="timeline-date">${formattedDate}</div>
                 <div class="timeline-user">Updated by: ${entry.updated_by}</div>
@@ -412,27 +476,76 @@ document.addEventListener('DOMContentLoaded', function() {
         const currDiv = document.querySelector('.current-version .version-details');
         
         let previousHtml = '', currentHtml = '';
-        const fields = ['department', 'Machine_type', 'user', 'computer_name', 'ip', 'processor', 'MOBO', 'power_supply', 'ram', 'SSD', 'OS', 'MAC_Address', 'deployment_date', 'is_active', 'status_changed_by', 'status_changed_date'];
         
-        fields.forEach(field => {
-            const changed = previousData[field] !== currentData[field] ? 'highlight-history' : '';
-            let prevValue = previousData[field] || 'N/A';
-            let currValue = currentData[field] || 'N/A';
-            if (field === 'deployment_date') {
-                prevValue = prevValue && prevValue !== 'N/A' ? new Date(prevValue).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}) : 'N/A';
-                currValue = currValue && currValue !== 'N/A' ? new Date(currValue).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}) : 'N/A';
+        // Group fields by category for better organization
+        const fieldGroups = [
+            {
+                title: 'Basic Information',
+                fields: ['department', 'Machine_type', 'user', 'computer_name', 'ip']
+            },
+            {
+                title: 'Hardware Specifications',
+                fields: ['processor', 'MOBO', 'power_supply', 'ram', 'SSD']
+            },
+            {
+                title: 'Software & System',
+                fields: ['OS']
+            },
+            {
+                title: 'Asset Information',
+                fields: ['MAC_Address', 'Asset_no', 'deployment_date']
+            },
+            {
+                title: 'Status Information',
+                fields: ['is_active', 'status_changed_by', 'status_changed_date']
             }
-            if (field === 'Machine_type') {
-                prevValue = prevValue.charAt(0).toUpperCase() + prevValue.slice(1);
-                currValue = currValue.charAt(0).toUpperCase() + currValue.slice(1);
-            }
-            if (field === 'is_active') {
-                prevValue = prevValue === 'Y' ? 'Active' : (prevValue === 'N' ? 'Inactive' : prevValue);
-                currValue = currValue === 'Y' ? 'Active' : (currValue === 'N' ? 'Inactive' : currValue);
-            }
-            previousHtml += `<div class="change-field ${changed}"><span class="field-name">${formatFieldName(field)}:</span><span class="field-value">${prevValue}</span></div>`;
-            currentHtml += `<div class="change-field ${changed}"><span class="field-name">${formatFieldName(field)}:</span><span class="field-value">${currValue}</span></div>`;
+        ];
+        
+        // Process each field group
+        fieldGroups.forEach(group => {
+            let prevGroupHtml = `<div class="field-group"><h5 class="group-title">${group.title}</h5>`;
+            let currGroupHtml = `<div class="field-group"><h5 class="group-title">${group.title}</h5>`;
+            
+            group.fields.forEach(field => {
+                // Check if field values are different
+                const changed = previousData[field] !== currentData[field] ? 'highlight-history' : '';
+                
+                // Format field values
+                let prevValue = previousData[field] || 'N/A';
+                let currValue = currentData[field] || 'N/A';
+                
+                // Special formatting for certain fields
+                if (field === 'deployment_date' || field === 'status_changed_date') {
+                    prevValue = prevValue && prevValue !== 'N/A' ? new Date(prevValue).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}) : 'N/A';
+                    currValue = currValue && currValue !== 'N/A' ? new Date(currValue).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}) : 'N/A';
+                }
+                
+                if (field === 'Machine_type') {
+                    prevValue = typeof prevValue === 'string' ? prevValue.charAt(0).toUpperCase() + prevValue.slice(1) : prevValue;
+                    currValue = typeof currValue === 'string' ? currValue.charAt(0).toUpperCase() + currValue.slice(1) : currValue;
+                }
+                
+                if (field === 'is_active') {
+                    prevValue = prevValue === 'Y' ? 'Active' : (prevValue === 'N' ? 'Inactive' : prevValue);
+                    currValue = currValue === 'Y' ? 'Active' : (currValue === 'N' ? 'Inactive' : currValue);
+                    
+                    // Add status indicator class
+                    prevValue = `<span class="status-indicator ${prevValue === 'Active' ? 'status-active' : 'status-inactive'}">${prevValue}</span>`;
+                    currValue = `<span class="status-indicator ${currValue === 'Active' ? 'status-active' : 'status-inactive'}">${currValue}</span>`;
+                }
+                
+                // Add field to group HTML
+                prevGroupHtml += `<div class="change-field ${changed}"><span class="field-name">${formatFieldName(field)}:</span><span class="field-value">${prevValue}</span></div>`;
+                currGroupHtml += `<div class="change-field ${changed}"><span class="field-name">${formatFieldName(field)}:</span><span class="field-value">${currValue}</span></div>`;
+            });
+            
+            prevGroupHtml += '</div>';
+            currGroupHtml += '</div>';
+            
+            previousHtml += prevGroupHtml;
+            currentHtml += currGroupHtml;
         });
+        
         prevDiv.innerHTML = previousHtml;
         currDiv.innerHTML = currentHtml;
     }
@@ -704,12 +817,14 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const searchQuery = searchInput.value.trim();
             const department = departmentFilter.value;
+            const status = statusFilter.value;
             const fromDate = lastUpdatedFrom.value;
             const toDate = lastUpdatedTo.value;
             
             console.log('Fetching data with filters:', {
                 search: searchQuery,
                 department: department,
+                status: status,
                 fromDate: fromDate,
                 toDate: toDate,
                 page: currentPage
@@ -721,6 +836,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('limit', 10);
             formData.append('search', searchQuery);
             formData.append('department', department);
+            formData.append('status', status);
             formData.append('last_updated_from', fromDate);
             formData.append('last_updated_to', toDate);
             
@@ -866,6 +982,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
     departmentFilter.addEventListener('change', refreshTable);
+    statusFilter.addEventListener('change', refreshTable);
     lastUpdatedFrom.addEventListener('change', refreshTable);
     lastUpdatedTo.addEventListener('change', refreshTable);
 
@@ -877,64 +994,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handles printing the table only
+    // Handles exporting the table as PDF
     const exportBtn = document.getElementById('printTableBtn');
     if (exportBtn) {
-        // Update button text to reflect new functionality (optional)
-        exportBtn.textContent = 'Export as PDF';
+        // Update button text to reflect functionality
+        exportBtn.textContent = 'Export PDF';
         
-        exportBtn.onclick = e => {
+        // Add PDF icon to button
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-file-pdf';
+        icon.style.marginRight = '5px';
+        exportBtn.prepend(icon);
+        
+        exportBtn.onclick = function(e) {
             e.preventDefault();
-            
-            // Get the table element to export
-            const tableElement = document.querySelector('table'); // Adjust selector if needed
-            
-            // Configure PDF options for complete table display
-            const options = {
-                margin: [5, 5, 5, 5],  // Smaller margins [top, right, bottom, left]
-                filename: 'computer-inventory.pdf',
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { 
-                    scale: 2,
-                    useCORS: true,
-                    logging: true,
-                    letterRendering: true
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a3', // Larger paper size
-                    orientation: 'landscape',
-                    compress: true,
-                    precision: 2,
-                    text: {
-                        fontSize: 12,
-                        font: 'helvetica',
-                        lineHeight: 1.5,
-                        textOverflow: 'ellipsis'
-                    }
-                }
-            };
             
             // Show loading indicator
             const originalText = exportBtn.textContent;
-            exportBtn.textContent = 'Generating PDF...';
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Generating...';
             exportBtn.disabled = true;
             
-            // Generate and download the PDF
-            html2pdf()
-                .from(tableElement)
-                .set(options)
-                .save()
-                .then(() => {
-                    // Restore button state
-                    exportBtn.textContent = originalText;
-                    exportBtn.disabled = false;
-                })
-                .catch(err => {
-                    console.error('PDF generation error:', err);
-                    exportBtn.textContent = originalText;
-                    exportBtn.disabled = false;
-                });
+            // Open the PDF generator in a new window
+            window.open('export.php?download=1', '_blank');
+            
+            // Reset button after a delay
+            setTimeout(() => {
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf" style="margin-right: 5px;"></i> ' + originalText;
+                exportBtn.disabled = false;
+            }, 2000);
         };
     }
 

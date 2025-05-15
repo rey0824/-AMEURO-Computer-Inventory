@@ -21,6 +21,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_computer' && isset($_GET[
     exit;
 }
 
+// AJAX handler for getting machine type counts
+if (isset($_GET['action']) && $_GET['action'] === 'get_machine_type_counts') {
+    $counts = getMachineTypeCounts($conn);
+    header('Content-Type: application/json');
+    echo json_encode($counts);
+    exit;
+}
+
 /**
  * Get a single computer by ID
  * @param mysqli $conn_mysqli - Database connection
@@ -265,37 +273,102 @@ function getMostRecentUpdates($conn_mysqli) {
 
 // Optimized function to get all dashboard stats in a single query
 function getDashboardStats($conn_mysqli) {
-    $sql = "SELECT 
-            (SELECT COUNT(*) FROM tblcomputer) as total_computers,
-            (SELECT COUNT(*) FROM tbemployee) as total_users,
-            (SELECT MAX(last_updated) FROM tblcomputer) as latest_computer_update,
-            (SELECT MAX(timestamp) FROM tblcomputer_history) as latest_history_update";
-            
+    $stats = [
+        'total_computers' => 0,
+        'total_users' => 0,
+        'latest_computer_update' => null,
+        'latest_history_update' => null
+    ];
+    
     try {
-        $result = $conn_mysqli->query($sql);
-        if ($result) {
-            $stats = $result->fetch_assoc();
-            return [
-                'total_computers' => (int)$stats['total_computers'],
-                'total_users' => (int)$stats['total_users'],
-                'latest_computer_update' => $stats['latest_computer_update'],
-                'latest_history_update' => $stats['latest_history_update']
-            ];
+        // Get total computers
+        $stats['total_computers'] = getTotalComputerCount($conn_mysqli);
+        
+        // Get total users
+        $stats['total_users'] = getTotalUserCount($conn_mysqli);
+        
+        // Get most recent updates
+        $recentUpdates = getMostRecentUpdates($conn_mysqli);
+        if ($recentUpdates) {
+            $stats['latest_computer_update'] = $recentUpdates['latest_computer_update'];
+            $stats['latest_history_update'] = $recentUpdates['latest_history_update'];
         }
-        return [
-            'total_computers' => 0,
-            'total_users' => 0,
-            'latest_computer_update' => null,
-            'latest_history_update' => null
-        ];
+        
+        return $stats;
     } catch (mysqli_sql_exception $e) {
-        error_log("Database error in getDashboardStats (mysqli): " . $e->getMessage());
-        return [
-            'total_computers' => 0,
-            'total_users' => 0,
-            'latest_computer_update' => null,
-            'latest_history_update' => null
-        ];
+        error_log("Database error in getDashboardStats: " . $e->getMessage());
+        return $stats;
+    }
+}
+
+/**
+ * Get counts of each machine type in the inventory
+ * @param mysqli $conn_mysqli - Database connection
+ * @return array - Counts of each machine type
+ */
+function getMachineTypeCounts($conn_mysqli) {
+    $counts = [
+        'Desktop' => 0,
+        'Laptop' => 0,
+        'Server' => 0,
+        'Router' => 0,
+        'Printer' => 0,
+        'Switch' => 0,
+        'Other' => 0
+    ];
+    
+    try {
+        // First check if we should use Machine_type or machine_type (case sensitivity)
+        $checkColumnQuery = "SHOW COLUMNS FROM tblcomputer LIKE '%machine%'";
+        $machineTypeColumn = 'Machine_type'; // Default to the one we saw in the database structure
+        
+        $columnResult = $conn_mysqli->query($checkColumnQuery);
+        if ($columnResult && $columnResult->num_rows > 0) {
+            while ($column = $columnResult->fetch_assoc()) {
+                if (strtolower($column['Field']) === 'machine_type') {
+                    $machineTypeColumn = $column['Field']; // Get the exact column name with correct case
+                    break;
+                }
+            }
+        }
+        
+        // Query to count computers by machine type
+        $sql = "SELECT LOWER($machineTypeColumn) as type, COUNT(*) as count 
+                FROM tblcomputer 
+                WHERE is_active = 'Y' 
+                GROUP BY LOWER($machineTypeColumn)";
+        
+        $result = $conn_mysqli->query($sql);
+        
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $type = trim(strtolower($row['type']));
+                
+                // Map the type to our predefined categories
+                if (empty($type)) {
+                    $counts['Other'] += $row['count'];
+                } elseif (strpos($type, 'desktop') !== false) {
+                    $counts['Desktop'] += $row['count'];
+                } elseif (strpos($type, 'laptop') !== false) {
+                    $counts['Laptop'] += $row['count'];
+                } elseif (strpos($type, 'server') !== false) {
+                    $counts['Server'] += $row['count'];
+                } elseif (strpos($type, 'router') !== false) {
+                    $counts['Router'] += $row['count'];
+                } elseif (strpos($type, 'printer') !== false) {
+                    $counts['Printer'] += $row['count'];
+                } elseif (strpos($type, 'switch') !== false) {
+                    $counts['Switch'] += $row['count'];
+                } else {
+                    $counts['Other'] += $row['count'];
+                }
+            }
+        }
+        
+        return $counts;
+    } catch (mysqli_sql_exception $e) {
+        error_log("Database error in getMachineTypeCounts: " . $e->getMessage());
+        return $counts;
     }
 }
 ?>

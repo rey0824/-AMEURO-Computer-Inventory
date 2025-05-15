@@ -10,6 +10,10 @@ require_login();
     <title>Computer Inventory Management</title>
     <link rel="stylesheet" href="CSS/list.css">
     <link rel="stylesheet" href="CSS/nav.css">
+    <link rel="stylesheet" href="CSS/modal-item-id.css">
+    <link rel="stylesheet" href="CSS/alert-modal.css">
+    <link rel="stylesheet" href="CSS/history-modal.css">
+    <link rel="stylesheet" href="CSS/table-optimization.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
@@ -59,51 +63,77 @@ require_login();
             </header>
 
             <div class="table-container">
-                <div class="section-header" style="display: flex; align-items: center; justify-content: space-between;">
-                    <h2 style="margin: 10px;"><i class="bi bi-table"></i> Computer Inventory List</h2>
-                </div>
-            
-            <div class="toolbar">
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search...">
-                    <select id="departmentFilter">
-                        <option value="">All Departments</option>
-                        <?php
-                        $departmentSql = "SELECT DISTINCT department FROM tblcomputer ORDER BY department";
-                        $departmentResult = $conn->query($departmentSql);
-                        
-                        if ($departmentResult->num_rows > 0) {
-                            while($deptRow = $departmentResult->fetch_assoc()) {
-                                echo "<option value='" . htmlspecialchars($deptRow["department"]) . "'>" . 
-                                    htmlspecialchars($deptRow["department"]) . "</option>";
-                            }
-                        }
-                        ?>
-                    </select>
-                    <!-- Date Range Filter -->
-                    <div class="date-range-filter">
-                        <label for="lastUpdatedFrom">From</label>
-                        <input type="date" id="lastUpdatedFrom" title="From Date">
-                        <label for="lastUpdatedTo">To</label>
-                        <input type="date" id="lastUpdatedTo" title="To Date">
+                <div class="section-header">
+                    <div class="header-left">
+                        <h2><i class="bi bi-table"></i> Computer Inventory List</h2>
+                    </div>
+                    <div class="header-right">
+                        <button id="addComputerBtn" class="btn btn-primary" title="Add New Computer">
+                            <i class="bi bi-plus-lg"></i> Add Computer
+                        </button>
                     </div>
                 </div>
-                <div class="action-buttons" style="margin-left:auto;">
-                    <button id="printTableBtn" class="btn btn-secondary"><i class="bi bi-printer"></i> Print</button>
-                    <button class="edit-btn" title="Edit Selected" disabled>
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="deactivate-btn" title="Deactivate Selected" disabled>
-                        <i class="bi bi-power"></i>
-                    </button>
-                    <button class="history-btn" title="View History" disabled>
-                        <i class="bi bi-clock-history"></i>
-                    </button>
-                    <button id="addComputerBtn" title="Add New Computer">
-                        <i class="bi bi-plus-lg"></i>
-                    </button>
+            
+                <div class="toolbar">
+                    <div class="filter-container">
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" id="searchInput" placeholder="Search...">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <div class="filter-item">
+                                <label for="departmentFilter">Department</label>
+                                <select id="departmentFilter">
+                                    <option value="">All Departments</option>
+                                    <?php
+                                    $departmentSql = "SELECT DISTINCT department FROM tblcomputer ORDER BY department";
+                                    $departmentResult = $conn->query($departmentSql);
+                                    if ($departmentResult->num_rows > 0) {
+                                        while($deptRow = $departmentResult->fetch_assoc()) {
+                                            echo "<option value='" . htmlspecialchars($deptRow["department"]) . "'>" . 
+                                                htmlspecialchars($deptRow["department"]) . "</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-item">
+                                <label for="statusFilter">Status</label>
+                                <select id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-item date-range-filter">
+                                <label>Date Range</label>
+                                <div class="date-inputs">
+                                    <input type="date" id="lastUpdatedFrom" title="From Date">
+                                    <span class="date-separator">to</span>
+                                    <input type="date" id="lastUpdatedTo" title="To Date">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="printTableBtn" class="btn btn-secondary">
+                            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                        </button>
+                        <button class="edit-btn" title="Edit Selected" disabled>
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="deactivate-btn" title="Deactivate Selected" disabled>
+                            <i class="bi bi-power"></i>
+                        </button>
+                        <button class="history-btn" title="View History" disabled>
+                            <i class="bi bi-clock-history"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
             
                 <table id="computersTable">
                     <thead>
@@ -139,6 +169,7 @@ require_login();
             <span class="close">&times;</span>
             <div class="modal-header">
                 <h2 id="modalTitle">Add New Computer</h2>
+                <span id="modalItemId" class="item-id-display"></span>
             </div>
             <div class="modal-body">
                 <form id="computerForm">
@@ -213,6 +244,11 @@ require_login();
                         </div>
 
                         <div class="form-group">
+                            <label for="assetNo">Asset No</label>
+                            <input type="text" id="assetNo" name="Asset_no" placeholder="Enter asset number">
+                        </div>
+
+                        <div class="form-group">
                             <label for="deploymentDate">Deployment Date</label>
                             <input type="date" id="deploymentDate" name="deployment_date">
                         </div>
@@ -233,41 +269,41 @@ require_login();
 
     <!-- History Modal -->
     <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Computer History</h2>
+        <div class="modal-content history-modal-content">
+            <div class="modal-header history-modal-header">
+                <h2><i class="bi bi-clock-history"></i> Computer History</h2>
                 <span id="historyTimestamp" class="history-timestamp-header"></span>
                 <span class="close">&times;</span>
             </div>
-            <div class="history-content">
-                <div class="history-timeline">
-                    <div class="timeline-container" id="historyTimeline">
-                        <!-- Timeline entries will be dynamically added here -->
-                    </div>
-                </div>
-                <div class="version-comparison">
-                    <div class="previous-version">
-                        <h3>Previous Version</h3>
-                        <div class="version-details"></div>
-                    </div>
-                    <div class="current-version">
-                        <h3>Current Version</h3>
-                        <div class="version-details"></div>
-                    </div>
-                </div>
-                <div class="history-changes">
-                    <?php
-                    if (!isset($history) || !isset($history['changes']) || !is_array($history['changes'])) {
-                        $history['changes'] = [];
-                    }
-                    foreach ($history['changes'] as $field => $change): ?>
-                        <div class="change-item">
-                            <strong><?php echo ucfirst(str_replace('_', ' ', $field)); ?></strong>
-                            <span class="old-value"><?php echo htmlspecialchars($change['old']); ?></span>
-                            <span class="change-arrow">→</span>
-                            <span class="new-value"><?php echo htmlspecialchars($change['new']); ?></span>
+            <div class="modal-body history-modal-body">
+                <div class="history-layout">
+                    <!-- Timeline sidebar -->
+                    <div class="history-sidebar">
+                        <h3 class="sidebar-title">Change Timeline</h3>
+                        <div class="timeline-container" id="historyTimeline">
+                            <!-- Timeline entries will be dynamically added here -->
                         </div>
-                    <?php endforeach; ?>
+                    </div>
+                    
+                    <!-- Version comparison main content -->
+                    <div class="history-main-content">
+                        <h3 class="content-title">Version Comparison</h3>
+                        <div class="version-comparison">
+                            <div class="version-card previous-version">
+                                <div class="version-header">
+                                    <h4>Previous Version</h4>
+                                </div>
+                                <div class="version-details"></div>
+                            </div>
+                            
+                            <div class="version-card current-version">
+                                <div class="version-header">
+                                    <h4>Current Version</h4>
+                                </div>
+                                <div class="version-details"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,6 +340,25 @@ require_login();
         <?php endif; ?>
 
 
+    <!-- Custom Alert Modal -->
+    <div id="alertModal" class="modal">
+        <div class="modal-content alert-modal-content">
+            <div class="alert-header">
+                <h3 id="alertTitle">Notification</h3>
+                <span class="close-alert">&times;</span>
+            </div>
+            <div class="alert-body">
+                <div class="alert-icon">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <p id="alertMessage"></p>
+            </div>
+            <div class="alert-footer">
+                <button id="alertOkBtn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+    
     <div class="modal-overlay"></div>
     <!-- Include html2pdf.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>

@@ -266,17 +266,83 @@ function populateDepartmentFilter() {
 
 // ===== Event Listeners =====
 
+/**
+ * Fetches machine type counts from the server and updates the popup
+ */
+function fetchMachineTypeCounts() {
+    fetch('dashbackend.php?action=get_machine_type_counts')
+        .then(response => response.json())
+        .then(data => {
+            // Update counts in the popup
+            document.getElementById('desktop-count').textContent = data.Desktop || 0;
+            document.getElementById('laptop-count').textContent = data.Laptop || 0;
+            document.getElementById('server-count').textContent = data.Server || 0;
+            document.getElementById('router-count').textContent = data.Router || 0;
+            document.getElementById('printer-count').textContent = data.Printer || 0;
+            document.getElementById('switch-count').textContent = data.Switch || 0;
+            document.getElementById('other-count').textContent = data.Other || 0;
+        })
+        .catch(error => {
+            console.error('Error fetching machine type counts:', error);
+        });
+}
+
+/**
+ * Shows the machine type popup
+ */
+function showMachineTypePopup() {
+    const popup = document.getElementById('machine-type-popup');
+    if (popup) {
+        // Fetch the latest counts before showing the popup
+        fetchMachineTypeCounts();
+        popup.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling behind popup
+    }
+}
+
+/**
+ * Hides the machine type popup
+ */
+function hideMachineTypePopup() {
+    const popup = document.getElementById('machine-type-popup');
+    if (popup) {
+        popup.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Re-enable scrolling
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize search functionality
     const updateSearch = document.getElementById('updateSearch');
-    const inventorySearch = document.getElementById('inventorySearch');
-    
     if (updateSearch) {
-        updateSearch.addEventListener('input', (e) => 
-            filterTableRows(e.target.value, 'inventoryTableBody')
-        );
+        updateSearch.addEventListener('input', function() {
+            filterTableRows(this.value, 'inventoryTableBody');
+        });
     }
     
+    // Setup machine type popup functionality
+    const totalComputersCard = document.getElementById('total-computers-card');
+    if (totalComputersCard) {
+        totalComputersCard.addEventListener('click', showMachineTypePopup);
+    }
+    
+    // Setup close popup functionality
+    const closePopup = document.querySelector('.close-popup');
+    if (closePopup) {
+        closePopup.addEventListener('click', hideMachineTypePopup);
+    }
+    
+    // Close popup when clicking outside of it
+    const machineTypePopup = document.getElementById('machine-type-popup');
+    if (machineTypePopup) {
+        machineTypePopup.addEventListener('click', function(event) {
+            if (event.target === this) {
+                hideMachineTypePopup();
+            }
+        });
+    }
+    
+    const inventorySearch = document.getElementById('inventorySearch');
     if (inventorySearch) {
         inventorySearch.addEventListener('input', (e) => 
             filterTableRows(e.target.value, 'inventoryTableBody')

@@ -1,0 +1,173 @@
+/* 
+ * Enhanced Table Highlighting Styles
+ * Improves visual appearance of tables in the dashboard
+ */
+
+/* Table base styling */
+.inventory-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Header styling */
+.inventory-table th {
+  background: linear-gradient(135deg, #4169e1 0%, #3a5fd9 100%);
+  color: white;
+  padding: 14px 16px;
+  font-weight: 600;
+  text-align: left;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.inventory-table th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.inventory-table th:last-child {
+  border-top-right-radius: 8px;
+}
+
+/* Row styling */
+.inventory-table tr {
+  transition: all 0.2s ease;
+}
+
+.inventory-table tbody tr:nth-child(odd) {
+  background-color: #f8f9ff;
+}
+
+.inventory-table tbody tr:nth-child(even) {
+  background-color: white;
+}
+
+/* Row hover effect */
+.inventory-table tbody tr:hover {
+  background-color: #eef2ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(65, 105, 225, 0.1);
+}
+
+/* Cell styling */
+.inventory-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e9f2;
+  font-size: 0.95rem;
+  color: #333;
+  vertical-align: middle;
+}
+
+/* Highlight for changed cells */
+.inventory-table td.highlight-history {
+  position: relative;
+  background-color: #e6fffa !important;
+  font-weight: 500;
+  color: #047481;
+  animation: pulse-highlight 2s infinite;
+}
+
+/* Pulse animation for highlighted cells */
+@keyframes pulse-highlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(4, 116, 129, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(4, 116, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(4, 116, 129, 0);
+  }
+}
+
+/* Add a left border indicator for highlighted cells */
+.inventory-table td.highlight-history::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #00b5cc;
+}
+
+/* Machine type styling */
+.inventory-table td:nth-child(3) {
+  font-weight: 500;
+}
+
+/* Desktop machine type */
+.inventory-table td:nth-child(3):contains("Desktop") {
+  color: #4169e1;
+}
+
+/* Laptop machine type */
+.inventory-table td:nth-child(3):contains("Laptop") {
+  color: #00b5cc;
+}
+
+/* Server machine type */
+.inventory-table td:nth-child(3):contains("Server") {
+  color: #ff9500;
+}
+
+/* Unknown machine type */
+.inventory-table td:nth-child(3):contains("Unknown") {
+  color: #6c757d;
+}
+
+/* Status column styling */
+.inventory-table td:nth-child(13) {
+  text-align: center;
+}
+
+/* Status indicators */
+.status-active {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #34c759;
+  color: white;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-inactive {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #ff3b30;
+  color: white;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+/* Empty state styling */
+.inventory-table .no-updates {
+  padding: 32px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  background-color: #f8f9ff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .inventory-table th,
+  .inventory-table td {
+    padding: 10px 12px;
+  }
+}

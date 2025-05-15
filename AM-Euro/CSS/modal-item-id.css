@@ -1,0 +1,25 @@
+/* CSS for Item ID display in modal header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    position: relative;
+}
+
+.item-id-display {
+    background-color: #f0f8ff;
+    color: #4e73df;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-left: 15px;
+    border: 1px solid #d1e3ff;
+}
+
+/* Hide Item ID display when adding a new computer */
+#modalItemId:empty {
+    display: none;
+}
