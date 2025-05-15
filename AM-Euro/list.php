@@ -16,6 +16,7 @@ require_login();
     <link rel="stylesheet" href="CSS/table-optimization.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         /* ... existing styles ... */
         
@@ -50,6 +51,534 @@ require_login();
             color: #6c757d;
             margin: 0 8px;
         }
+        
+        /* Date picker styling */
+        .date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+        
+        .datepicker {
+            padding: 8px 30px 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            background-color: white;
+        }
+        
+        .datepicker:focus {
+            outline: none;
+            border-color: #33ccff;
+            box-shadow: 0 0 0 3px rgba(51, 204, 255, 0.15);
+        }
+        
+        .date-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+        }
+        
+        .date-separator {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        /* Flatpickr theme overrides */
+        .flatpickr-calendar {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px;
+        }
+        
+        .flatpickr-day.selected {
+            background: #33ccff;
+            border-color: #33ccff;
+        }
+        
+        .flatpickr-day.selected:hover {
+            background: #00bfff;
+            border-color: #00bfff;
+        }
+        
+        .flatpickr-clear-button {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin: 10px;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            float: right;
+        }
+        
+        .flatpickr-clear-button:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        
+        /* Modern filter styling */
+        .toolbar {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 16px;
+        }
+        
+        #searchInput {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 1px solid #d7dce4;
+            border-radius: 10px;
+            font-size: 15px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            border-color: #33ccff;
+            box-shadow: 0 0 0 3px rgba(51, 204, 255, 0.15);
+        }
+        
+        .search-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        
+        .filter-item {
+            min-width: 200px;
+            flex: 1;
+        }
+        
+        .filter-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .filter-item label i {
+            margin-right: 6px;
+            color: #33ccff;
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .modern-select {
+            width: 100%;
+            padding: 12px 14px;
+            appearance: none;
+            border: 1px solid #d7dce4;
+            border-radius: 10px;
+            background-color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        
+        .modern-select:focus {
+            outline: none;
+            border-color: #33ccff;
+            box-shadow: 0 0 0 3px rgba(51, 204, 255, 0.15);
+        }
+        
+        .select-arrow {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+            transition: transform 0.2s ease;
+        }
+        
+        .modern-select:focus + .select-arrow {
+            transform: translateY(-50%) rotate(180deg);
+            color: #33ccff;
+        }
+        
+        /* Date picker styling */
+        .date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+        
+        .datepicker {
+            width: 100%;
+            padding: 12px 14px 12px 36px;
+            border: 1px solid #d7dce4;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        
+        .datepicker:focus {
+            outline: none;
+            border-color: #33ccff;
+            box-shadow: 0 0 0 3px rgba(51, 204, 255, 0.15);
+        }
+        
+        .date-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .date-input-wrapper:hover .date-icon,
+        .datepicker:focus + .date-icon {
+            color: #33ccff;
+        }
+        
+        .date-separator {
+            font-weight: 500;
+            color: #495057;
+            padding: 0 4px;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons button {
+            background-color: #fff;
+            border: 1px solid #d7dce4;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #495057;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        
+        .action-buttons button:not(:disabled):hover {
+            background-color: #f8f9ff;
+            border-color: #33ccff;
+            color: #33ccff;
+        }
+        
+        .action-buttons button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #33ccff 0%, #00bfff 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(51, 204, 255, 0.25);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00bfff 0%, #0099cc 100%);
+            box-shadow: 0 6px 16px rgba(51, 204, 255, 0.35);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: #e0e7ff;
+            color: #4e73df;
+            border-color: #d6e0ff;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d6e0ff;
+            color: #375ad3;
+        }
+        
+        .btn-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 10px;
+            background-color: #fff;
+            color: #495057;
+            border: 1px solid #d7dce4;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-icon i {
+            font-size: 18px;
+        }
+        
+        .btn-icon:not(:disabled):hover {
+            background-color: #f8f9ff;
+            border-color: #33ccff;
+            color: #33ccff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .toolbar {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            
+            .filter-container {
+                flex: 1;
+            }
+            
+            .action-buttons {
+                margin-top: 0;
+                align-items: flex-end;
+                padding-top: 28px;
+            }
+            
+            .search-box {
+                max-width: 400px;
+            }
+        }
+        
+        /* Flatpickr theme overrides */
+        .flatpickr-calendar {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .flatpickr-month {
+            background: linear-gradient(135deg, #33ccff 0%, #00bfff 100%);
+            color: white;
+        }
+        
+        .flatpickr-weekday {
+            background: #f8f9ff;
+            color: #495057;
+        }
+        
+        .flatpickr-day.selected {
+            background: #33ccff;
+            border-color: #33ccff;
+            box-shadow: 0 2px 6px rgba(51, 204, 255, 0.25);
+        }
+        
+        .flatpickr-day.selected:hover {
+            background: #00bfff;
+            border-color: #00bfff;
+        }
+        
+        .flatpickr-day:hover {
+            background: #f0f8ff;
+        }
+        
+        .flatpickr-clear-button {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin: 8px;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            float: right;
+        }
+        
+        .flatpickr-clear-button:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        
+        .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .flatpickr-current-month input.cur-year {
+            color: white;
+            font-weight: 500;
+        }
+        
+        .numInputWrapper span.arrowUp:after,
+        .numInputWrapper span.arrowDown:after {
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Table styling improvements */
+        #computersTable {
+            border-radius: 10px;
+            overflow: hidden;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        #computersTable thead {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
+        }
+        
+        #computersTable th {
+            padding: 14px 12px;
+            font-weight: 600;
+            text-align: left;
+            color: #495057;
+            border-bottom: 2px solid #e0e7ff;
+            white-space: nowrap;
+        }
+        
+        #computersTable td {
+            padding: 12px;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: middle;
+        }
+        
+        #computersTable tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        #computersTable tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+        
+        #computersTable tbody tr.selected {
+            background-color: #e6f7ff;
+        }
+        
+        .highlight-cell-change {
+            animation: highlight-pulse 2s ease-in-out;
+        }
+        
+        @keyframes highlight-pulse {
+            0% { background-color: rgba(51, 204, 255, 0.1); }
+            50% { background-color: rgba(51, 204, 255, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        /* Pagination improvements */
+        .pagination {
+            margin-top: 20px;
+        }
+        
+        .pagination-modern {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .pag-btn {
+            background: #fff;
+            border: 1px solid #d7dce4;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            min-width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pag-btn.active, 
+        .pag-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #33ccff 0%, #00bfff 100%);
+            color: #fff;
+            border-color: #33ccff;
+            box-shadow: 0 2px 8px rgba(51, 204, 255, 0.25);
+        }
+        
+        .pagination-summary {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        /* Add Computer button enhancements */
+        #addComputerBtn {
+            padding: 12px 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #addComputerBtn i {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -78,58 +607,77 @@ require_login();
                     <div class="filter-container">
                         <div class="search-box">
                             <i class="bi bi-search search-icon"></i>
-                            <input type="text" id="searchInput" placeholder="Search...">
+                            <input type="text" id="searchInput" placeholder="Search computers..." class="modern-input">
+                            <div class="search-hint">Search by name, IP, department, user...</div>
                         </div>
                         
                         <div class="filter-group">
                             <div class="filter-item">
-                                <label for="departmentFilter">Department</label>
-                                <select id="departmentFilter">
-                                    <option value="">All Departments</option>
-                                    <?php
-                                    $departmentSql = "SELECT DISTINCT department FROM tblcomputer ORDER BY department";
-                                    $departmentResult = $conn->query($departmentSql);
-                                    if ($departmentResult->num_rows > 0) {
-                                        while($deptRow = $departmentResult->fetch_assoc()) {
-                                            echo "<option value='" . htmlspecialchars($deptRow["department"]) . "'>" . 
-                                                htmlspecialchars($deptRow["department"]) . "</option>";
+                                <label for="departmentFilter">
+                                    <i class="bi bi-building"></i> Department
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="departmentFilter" class="modern-select">
+                                        <option value="">All Departments</option>
+                                        <?php
+                                        $departmentSql = "SELECT DISTINCT department FROM tblcomputer ORDER BY department";
+                                        $departmentResult = $conn->query($departmentSql);
+                                        if ($departmentResult->num_rows > 0) {
+                                            while($deptRow = $departmentResult->fetch_assoc()) {
+                                                echo "<option value='" . htmlspecialchars($deptRow["department"]) . "'>" . 
+                                                    htmlspecialchars($deptRow["department"]) . "</option>";
+                                            }
                                         }
-                                    }
-                                    ?>
-                                </select>
+                                        ?>
+                                    </select>
+                                    <i class="bi bi-chevron-down select-arrow"></i>
+                                </div>
                             </div>
                             
                             <div class="filter-item">
-                                <label for="statusFilter">Status</label>
-                                <select id="statusFilter">
-                                    <option value="">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
+                                <label for="statusFilter">
+                                    <i class="bi bi-toggle-on"></i> Status
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="statusFilter" class="modern-select">
+                                        <option value="">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                    <i class="bi bi-chevron-down select-arrow"></i>
+                                </div>
                             </div>
                             
                             <div class="filter-item date-range-filter">
-                                <label>Date Range</label>
+                                <label>
+                                    <i class="bi bi-calendar-range"></i> Date Range
+                                </label>
                                 <div class="date-inputs">
-                                    <input type="date" id="lastUpdatedFrom" title="From Date">
+                                    <div class="date-input-wrapper">
+                                        <input type="text" id="lastUpdatedFrom" placeholder="MM-DD-YY" class="datepicker" title="From Date (MM-DD-YY)">
+                                        <i class="bi bi-calendar-event date-icon"></i>
+                                    </div>
                                     <span class="date-separator">to</span>
-                                    <input type="date" id="lastUpdatedTo" title="To Date">
+                                    <div class="date-input-wrapper">
+                                        <input type="text" id="lastUpdatedTo" placeholder="MM-DD-YY" class="datepicker" title="To Date (MM-DD-YY)">
+                                        <i class="bi bi-calendar-event date-icon"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="action-buttons">
-                        <button id="printTableBtn" class="btn btn-secondary">
+                        <button id="printTableBtn" class="btn btn-secondary" title="Export table as PDF">
                             <i class="bi bi-file-earmark-pdf"></i> Export PDF
                         </button>
-                        <button class="edit-btn" title="Edit Selected" disabled>
+                        <button class="btn btn-icon edit-btn" title="Edit Selected" disabled>
                             <i class="bi bi-pencil-square"></i>
                         </button>
-                        <button class="deactivate-btn" title="Deactivate Selected" disabled>
+                        <button class="btn btn-icon deactivate-btn" title="Change Status" disabled>
                             <i class="bi bi-power"></i>
                         </button>
-                        <button class="history-btn" title="View History" disabled>
+                        <button class="btn btn-icon history-btn" title="View History" disabled>
                             <i class="bi bi-clock-history"></i>
                         </button>
                     </div>
@@ -362,6 +910,8 @@ require_login();
     <div class="modal-overlay"></div>
     <!-- Include html2pdf.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Include flatpickr datepicker -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="JS/list.js"></script>
 </body>
 </html>

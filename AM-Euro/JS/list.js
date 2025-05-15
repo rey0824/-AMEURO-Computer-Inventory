@@ -422,7 +422,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create timeline entries
         sortedHistory.forEach((entry, index) => {
             const date = new Date(entry.timestamp);
-            const formattedDate = date.toLocaleString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            // Format date as MM-DD-YY with time
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const formattedDate = `${formatDateMMDDYY(entry.timestamp)} ${hours}:${minutes}:${seconds}`;
             
             const timelineEntry = document.createElement('div');
             timelineEntry.className = 'timeline-entry';
@@ -457,16 +461,21 @@ document.addEventListener('DOMContentLoaded', function() {
             timelineContainer.appendChild(timelineEntry);
         });
         
-        // Show the most recent version by default
-        if (sortedHistory.length > 0) {
-            const latestEntry = timelineContainer.querySelector('.timeline-entry');
-            latestEntry.classList.add('active');
-            const latestChanges = sortedHistory[0].changes;
-            displayVersionComparison(latestChanges.previous, latestChanges.new);
+        // If no timeline entry is active (first load), activate the first one
+        if (!document.querySelector('.timeline-entry.active') && sortedHistory.length > 0) {
+            document.querySelector('.timeline-entry').classList.add('active');
+            displayVersionComparison(
+                sortedHistory[0].changes ? sortedHistory[0].changes.previous : null,
+                sortedHistory[0].changes ? sortedHistory[0].changes.new : null
+            );
             
             // Update timestamp
             const latestDate = new Date(sortedHistory[0].timestamp);
-            timestampSpan.textContent = `Last Change: ${latestDate.toLocaleString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'})}`;
+            const hours = String(latestDate.getHours()).padStart(2, '0');
+            const minutes = String(latestDate.getMinutes()).padStart(2, '0');
+            const seconds = String(latestDate.getSeconds()).padStart(2, '0');
+            const formattedLatestDate = `${formatDateMMDDYY(sortedHistory[0].timestamp)} ${hours}:${minutes}:${seconds}`;
+            timestampSpan.textContent = `Last Change: ${formattedLatestDate}`;
         }
     }
     
@@ -502,10 +511,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 let prevValue = previousData[field] || 'N/A';
                 let currValue = currentData[field] || 'N/A';
                 
-                // Special formatting for certain fields
+                // Add date-specific formatting
                 if (field === 'deployment_date' || field === 'status_changed_date') {
-                    prevValue = prevValue && prevValue !== 'N/A' ? new Date(prevValue).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}) : 'N/A';
-                    currValue = currValue && currValue !== 'N/A' ? new Date(currValue).toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}) : 'N/A';
+                    prevValue = prevValue && prevValue !== 'N/A' ? formatDateMMDDYY(prevValue) : 'N/A';
+                    currValue = currValue && currValue !== 'N/A' ? formatDateMMDDYY(currValue) : 'N/A';
                 }
                 
                 if (field === 'Machine_type') {
@@ -712,21 +721,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const tbody = computersTable.querySelector('tbody');
         tbody.innerHTML = '';
         
-        if (!computers || computers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="14" class="no-data">No computers found</td></tr>';
-            return;
-        }
-
+        // Field to column index mapping for highlighting cells
+        const fieldToColumnMap = {
+            department: 1,
+            Machine_type: 2,
+            user: 3,
+            computer_name: 4,
+            ip: 5,
+            processor: 6,
+            MOBO: 7,
+            power_supply: 8,
+            ram: 9,
+            SSD: 10,
+            OS: 11,
+            is_active: 12
+        };
+        
         // Get current time to check for recent updates (within the last hour)
         const currentTime = new Date();
         const oneHourAgo = new Date(currentTime - 60 * 60 * 1000); // 1 hour in milliseconds
         
+        // If no computers found, display message
+        if (computers.length === 0) {
+            tbody.innerHTML = '<tr class="no-data"><td colspan="14">No matching records found</td></tr>';
+            return;
+        }
+        
         computers.forEach(computer => {
+            // Format the date to MM-DD-YY format using our helper function
+            const formattedDate = formatDateMMDDYY(computer.formatted_date || computer.last_updated);
+            
             const row = document.createElement('tr');
             row.dataset.id = computer.computer_No;
             
             const status = computer.is_active === 'Y' ? 'Active' : 'Inactive';
-            const formattedDate = computer.formatted_date || new Date(computer.last_updated).toLocaleString() || 'N/A';
             
             // Check if this is a recently updated record
             const lastUpdated = new Date(computer.last_updated);
@@ -739,24 +767,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Check if this is the computer with changed fields
             const hasChangedFields = changedFields.computerId === computer.computer_No && changedFields.fields && changedFields.fields.length > 0;
-            
-            // Map field names to column indices
-            const fieldToColumnMap = {
-                'computer_No': 0,
-                'department': 1,
-                'Machine_type': 2,
-                'user': 3,
-                'computer_name': 4,
-                'ip': 5,
-                'processor': 6,
-                'MOBO': 7,
-                'power_supply': 8,
-                'ram': 9,
-                'SSD': 10,
-                'OS': 11,
-                'is_active': 12
-                // last_updated is not included as it always changes
-            };
             
             row.innerHTML = `
                 <td>${computer.computer_No}</td>
@@ -795,6 +805,60 @@ document.addEventListener('DOMContentLoaded', function() {
         updateButtonStates();
     }
 
+    // Event listeners for search and filter inputs to refresh the table
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentPage = 1;
+            refreshTable();
+        }, 300);
+    });
+    departmentFilter.addEventListener('change', refreshTable);
+    statusFilter.addEventListener('change', refreshTable);
+    
+    // Closes modals when close/cancel buttons are clicked
+    document.querySelectorAll('.close, .btn-cancel, #cancelBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            closeModal(modal);
+        });
+    });
+
+    // Handles exporting the table as PDF
+    const exportBtn = document.getElementById('printTableBtn');
+    if (exportBtn) {
+        // Update button text to reflect functionality
+        exportBtn.textContent = 'Export PDF';
+        
+        // Add PDF icon to button
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-file-pdf';
+        icon.style.marginRight = '5px';
+        exportBtn.prepend(icon);
+        
+        exportBtn.onclick = function(e) {
+            e.preventDefault();
+            
+            // Show loading indicator
+            const originalText = exportBtn.textContent;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Generating...';
+            exportBtn.disabled = true;
+            
+            // Get the current status filter value
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            // Open the PDF generator in a new window with status filter
+            window.open(`export-pdf.php?status=${statusFilter}`, '_blank');
+            
+            // Reset button after a delay
+            setTimeout(() => {
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf" style="margin-right: 5px;"></i> ' + originalText;
+                exportBtn.disabled = false;
+            }, 2000);
+        };
+    }
+
     // Fetches and displays computer data based on current filters
     async function refreshTable(highlightId = null) {
         const tbody = computersTable.querySelector('tbody');
@@ -806,8 +870,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchQuery = searchInput.value.trim();
             const department = departmentFilter.value;
             const status = statusFilter.value;
-            const fromDate = lastUpdatedFrom.value;
-            const toDate = lastUpdatedTo.value;
+            
+            // Get dates from flatpickr instances
+            const fromDatepicker = document.getElementById('lastUpdatedFrom')._flatpickr;
+            const toDatepicker = document.getElementById('lastUpdatedTo')._flatpickr;
+            
+            // Format dates for backend (YYYY-MM-DD) if dates are selected
+            let fromDate = '';
+            let toDate = '';
+            
+            if (fromDatepicker && fromDatepicker.selectedDates.length > 0) {
+                const date = fromDatepicker.selectedDates[0];
+                fromDate = date.getFullYear() + '-' + 
+                           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(date.getDate()).padStart(2, '0');
+            }
+            
+            if (toDatepicker && toDatepicker.selectedDates.length > 0) {
+                const date = toDatepicker.selectedDates[0];
+                toDate = date.getFullYear() + '-' + 
+                         String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(date.getDate()).padStart(2, '0');
+            }
             
             console.log('Fetching data with filters:', {
                 search: searchQuery,
@@ -960,62 +1044,6 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshTable();
     }
 
-    // Event listeners for search and filter inputs to refresh the table
-    let searchTimeout;
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            currentPage = 1;
-            refreshTable();
-        }, 300);
-    });
-    departmentFilter.addEventListener('change', refreshTable);
-    statusFilter.addEventListener('change', refreshTable);
-    lastUpdatedFrom.addEventListener('change', refreshTable);
-    lastUpdatedTo.addEventListener('change', refreshTable);
-
-    // Closes modals when close/cancel buttons are clicked
-    document.querySelectorAll('.close, .btn-cancel, #cancelBtn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const modal = this.closest('.modal');
-            closeModal(modal);
-        });
-    });
-
-    // Handles exporting the table as PDF
-    const exportBtn = document.getElementById('printTableBtn');
-    if (exportBtn) {
-        // Update button text to reflect functionality
-        exportBtn.textContent = 'Export PDF';
-        
-        // Add PDF icon to button
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-file-pdf';
-        icon.style.marginRight = '5px';
-        exportBtn.prepend(icon);
-        
-        exportBtn.onclick = function(e) {
-            e.preventDefault();
-            
-            // Show loading indicator
-            const originalText = exportBtn.textContent;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Generating...';
-            exportBtn.disabled = true;
-            
-            // Get the current status filter value
-            const statusFilter = document.getElementById('statusFilter').value;
-            
-            // Open the PDF generator in a new window with status filter
-            window.open(`export-pdf.php?status=${statusFilter}`, '_blank');
-            
-            // Reset button after a delay
-            setTimeout(() => {
-                exportBtn.innerHTML = '<i class="fas fa-file-pdf" style="margin-right: 5px;"></i> ' + originalText;
-                exportBtn.disabled = false;
-            }, 2000);
-        };
-    }
-
     // Initial UI setup
     updateButtonStates();
     renderPagination(currentPage, totalPages);
@@ -1154,4 +1182,64 @@ input.error, select.error { border-color: #f44336 !important; background-color: 
 }
 `;
     document.head.appendChild(style);
+
+    // Helper function to format dates as MM-DD-YY
+    function formatDateMMDDYY(dateStr) {
+        if (!dateStr) return 'N/A';
+        const date = new Date(dateStr);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2);
+        return `${month}-${day}-${year}`;
+    }
+    
+    // Initialize date pickers with MM-DD-YY format
+    const datePickerConfig = {
+        dateFormat: "m-d-y",
+        allowInput: true,
+        altFormat: "m-d-y",
+        altInput: true,
+        altInputClass: "datepicker",
+        monthSelectorType: "static",
+        onOpen: function(selectedDates, dateStr, instance) {
+            // Add clear button if there's a value
+            if (dateStr !== '') {
+                const clearButton = document.createElement('button');
+                clearButton.type = 'button';
+                clearButton.className = 'flatpickr-clear-button';
+                clearButton.textContent = 'Clear';
+                clearButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    instance.clear();
+                    instance.close();
+                    refreshTable();
+                });
+                instance.calendarContainer.appendChild(clearButton);
+            }
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (dateStr !== '') {
+                setTimeout(refreshTable, 100);
+            }
+        }
+    };
+    
+    // Initialize date pickers
+    flatpickr("#lastUpdatedFrom", datePickerConfig);
+    flatpickr("#lastUpdatedTo", datePickerConfig);
+    
+    // Make the calendar icon clickable
+    document.querySelectorAll('.date-input-wrapper').forEach(wrapper => {
+        const dateInput = wrapper.querySelector('.datepicker');
+        const dateIcon = wrapper.querySelector('.date-icon');
+        
+        if (dateIcon && dateInput) {
+            dateIcon.style.pointerEvents = 'auto';
+            dateIcon.style.cursor = 'pointer';
+            dateIcon.addEventListener('click', () => {
+                dateInput._flatpickr.open();
+            });
+        }
+    });
 });
