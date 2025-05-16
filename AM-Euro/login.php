@@ -58,14 +58,18 @@ if (is_logged_in() && basename($_SERVER['PHP_SELF']) == 'index.php') {
             if (empty($name) || empty($password)) {
                 $error = "name and password are required";
             } else {
-                $stmt = $conn->prepare("SELECT emp_ID, Name, Password FROM tbemployee WHERE Name = ?");
+                $stmt = $conn->prepare("SELECT emp_ID, Name, Password, status FROM tbemployee WHERE Name = ?");
                 $stmt->bind_param("s", $name);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 if ($result->num_rows == 1) {
                     $employee = $result->fetch_assoc();
+                    // Check if user is active
+                    if ($employee["status"] !== 'active') {
+                        $error = "This account is inactive. Please contact the administrator.";
+                    } 
                     // Check if password matches
-                    if ($password == $employee["Password"]) {
+                    else if ($password == $employee["Password"]) {
                         $_SESSION["emp_ID"] = $employee["emp_ID"];
                         $_SESSION["name"] = $employee["Name"];
                         redirect('dashboard.php');

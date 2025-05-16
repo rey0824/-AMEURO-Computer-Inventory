@@ -33,6 +33,7 @@ require_login();
                                 <th><i class="bi bi-person"></i> Name</th>
                                 <th><i class="bi bi-key"></i> Password</th>
                                 <th><i class="bi bi-person-badge"></i> Role</th>
+                                <th><i class="bi bi-info-circle"></i> Status</th>
                                 <th><i class="bi bi-gear"></i> Actions</th>
                             </tr>
                         </thead>
@@ -91,22 +92,7 @@ require_login();
             </div>
         </div>
     </div>
-    <!-- Delete Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="modal-header">
-                <h3><i class="bi bi-exclamation-triangle"></i> Confirm Delete</h3>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel"><i class="bi bi-x-circle"></i> Cancel</button>
-                    <button type="button" class="btn-confirm"><i class="bi bi-trash"></i> Delete</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
     <div class="modal-overlay"></div>
     <script src="JS/user.js"></script>
 </body>

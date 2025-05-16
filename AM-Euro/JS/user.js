@@ -76,11 +76,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${user.Password}</td>
                         <td>${getRoleBadge(user.Role)}</td>
                         <td>
+                            <span class="status-badge ${user.status === 'active' ? 'status-active' : 'status-inactive'}">
+                                ${user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                            </span>
+                        </td>
+                        <td>
                             <button class="btn btn-action btn-edit edit-btn" data-id="${user.emp_ID}" title="Edit User">
                                 <i class="bi bi-pencil-square"></i>
                             </button>
-                            <button class="btn btn-action btn-delete delete-btn" data-id="${user.emp_ID}" title="Delete User">
-                                <i class="bi bi-trash"></i>
+                            <button class="btn btn-action btn-toggle-status" 
+                                    data-id="${user.emp_ID}" 
+                                    data-status="${user.status === 'active' ? 'inactive' : 'active'}"
+                                    title="${user.status === 'active' ? 'Deactivate' : 'Activate'} User">
+                                <i class="bi ${user.status === 'active' ? 'bi-person-x' : 'bi-person-check'}"></i>
                             </button>
                         </td>
                     `;
@@ -232,47 +240,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('Error loading user data', 'error');
             });
         }
-        
-        // Delete User
-        if (e.target.closest('.delete-btn')) {
-            deleteUserId = e.target.closest('.delete-btn').dataset.id;
-            
-            // Get user name for confirmation
-            fetch('Userbackend.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `action=list`
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    const user = data.users.find(u => u.emp_ID == deleteUserId);
-                    if (user) {
-                        // Update delete confirmation message with user name
-                        const confirmMsg = deleteModal.querySelector('.modal-body p');
-                        confirmMsg.innerHTML = `Are you sure you want to delete user <strong>${user.Name}</strong>? This action cannot be undone.`;
-                        showModal(deleteModal);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching user data:', error);
-                showNotification('Error loading user data', 'error');
-            });
-        }
     });
 
     // Close modals
     document.querySelectorAll('.modal .close, #cancelBtn, .btn-cancel').forEach(btn => {
         btn.addEventListener('click', function() {
             hideModal(userModal);
-            hideModal(deleteModal);
         });
     });
     
     modalOverlay.addEventListener('click', function() {
         hideModal(userModal);
-        hideModal(deleteModal);
     });
 
     // Add/Edit submit with password confirmation validation
@@ -340,40 +318,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Confirm delete
-    deleteModal.querySelector('.btn-confirm').addEventListener('click', function() {
-        if (!deleteUserId) return;
-        
-        // Button loading state
-        const deleteBtn = this;
-        const originalBtnText = deleteBtn.innerHTML;
-        deleteBtn.innerHTML = '<i class="bi bi-hourglass"></i> Deleting...';
-        deleteBtn.disabled = true;
-        
-        fetch('Userbackend.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `action=delete&emp_ID=${deleteUserId}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                hideModal(deleteModal);
-                fetchUsers();
-                showNotification('User deleted successfully');
-            } else {
-                showNotification(data.message || 'Error deleting user', 'error');
+    // Toggle User Status
+    usersTableBody.addEventListener('click', async function(e) {
+        const toggleBtn = e.target.closest('.btn-toggle-status');
+        if (toggleBtn) {
+            const userId = toggleBtn.getAttribute('data-id');
+            const newStatus = toggleBtn.getAttribute('data-status');
+            const action = newStatus === 'active' ? 'activate' : 'deactivate';
+            
+            try {
+                const response = await fetch('Userbackend.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=toggleStatus&emp_ID=${userId}&status=${newStatus}`
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(`User ${action}d successfully`, 'success');
+                    fetchUsers();
+                } else {
+                    showNotification(data.message || `Failed to ${action} user`, 'error');
+                }
+            } catch (error) {
+                console.error(`Error ${action}ing user:`, error);
+                showNotification(`Error ${action}ing user`, 'error');
             }
-        })
-        .catch(error => {
-            console.error('Error deleting user:', error);
-            showNotification('Error deleting user', 'error');
-        })
-        .finally(() => {
-            // Reset button state
-            deleteBtn.innerHTML = originalBtnText;
-            deleteBtn.disabled = false;
-        });
+        }
     });
 
     // Add additional styles
@@ -439,6 +410,40 @@ document.addEventListener('DOMContentLoaded', function() {
         .modal {
             transform: translate(-50%, -50%) scale(0.9);
             transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        
+        /* Toggle status button styles */
+        .btn-toggle-status {
+            margin-left: 0.5rem;
+            border: 1px solid #d1d3e2;
+            transition: all 0.3s ease;
+        }
+        
+        /* Active state (will show red for deactivate action) */
+        .btn-toggle-status[data-status="inactive"] {
+            background-color: #e74a3b;
+            color: white;
+        }
+        
+        .btn-toggle-status[data-status="inactive"]:hover {
+            background-color: #d32f2f;
+            border-color: #c62828;
+        }
+        
+        /* Inactive state (will show green for activate action) */
+        .btn-toggle-status[data-status="active"] {
+            background-color: #1cc88a;
+            color: white;
+        }
+        
+        .btn-toggle-status[data-status="active"]:hover {
+            background-color: #17a673;
+            border-color: #169b6b;
+        }
+        
+        /* Icons color */
+        .btn-toggle-status .bi {
+            color: white;
         }
     `;
     document.head.appendChild(style);

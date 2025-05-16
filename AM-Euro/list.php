@@ -587,7 +587,7 @@ require_login();
     <div class="container">
         <div class="content-wrapper">
             <header>
-                <h1><i class="bi bi-pc-display"></i> Computer Inventory Management System</h1>
+                <h1><img src="IMG/logo.png" alt="Logo" style="width: 50px; height: auto;"> Computer Inventory Management System</h1>
                 <p>Track and manage all computer assets across departments</p>
             </header>
 
@@ -650,7 +650,7 @@ require_login();
                             
                             <div class="filter-item date-range-filter">
                                 <label>
-                                    <i class="bi bi-calendar-range"></i> Date Range
+                                    <i class="bi bi-calendar-range"></i> Date Range (Updates)
                                 </label>
                                 <div class="date-inputs">
                                     <div class="date-input-wrapper">

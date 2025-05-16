@@ -24,8 +24,8 @@ switch ($action) {
     case 'edit':
         editUser();
         break;
-    case 'delete':
-        deleteUser();
+    case 'toggleStatus':
+        toggleUserStatus();
         break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
@@ -34,7 +34,7 @@ switch ($action) {
 
 function listUsers() {
     global $conn;
-    $sql = "SELECT emp_ID, Name, Password, Role FROM tbemployee ORDER BY emp_ID ASC";
+    $sql = "SELECT emp_ID, Name, Password, Role, status FROM tbemployee ORDER BY emp_ID ASC";
     $result = $conn->query($sql);
     $users = [];
     if ($result && $result->num_rows > 0) {
@@ -52,8 +52,9 @@ function addUser() {
         echo json_encode(['success' => false, 'message' => 'All fields are required']);
         return;
     }
-    $stmt = $conn->prepare("INSERT INTO tbemployee (Name, Password, Role) VALUES (?, ?, ?)");
-    $stmt->bind_param('sss', $data['Name'], $data['Password'], $data['Role']);
+    $status = 'active'; // New users are active by default
+    $stmt = $conn->prepare("INSERT INTO tbemployee (Name, Password, Role, status) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param('ssss', $data['Name'], $data['Password'], $data['Role'], $status);
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'User added successfully']);
     } else {
@@ -77,18 +78,23 @@ function editUser() {
     }
 }
 
-function deleteUser() {
+function toggleUserStatus() {
     global $conn;
     $id = isset($_POST['emp_ID']) ? (int)$_POST['emp_ID'] : 0;
-    if ($id <= 0) {
-        echo json_encode(['success' => false, 'message' => 'Invalid user ID']);
+    $status = isset($_POST['status']) ? sanitize_input($_POST['status']) : '';
+    
+    if ($id <= 0 || !in_array($status, ['active', 'inactive'])) {
+        echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
         return;
     }
-    $stmt = $conn->prepare("DELETE FROM tbemployee WHERE emp_ID=?");
-    $stmt->bind_param('i', $id);
+    
+    $stmt = $conn->prepare("UPDATE tbemployee SET status = ? WHERE emp_ID = ?");
+    $stmt->bind_param('si', $status, $id);
+    
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
+        $action = $status === 'active' ? 'activated' : 'deactivated';
+        echo json_encode(['success' => true, 'message' => "User {$action} successfully"]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to delete user: ' . $conn->error]);
+        echo json_encode(['success' => false, 'message' => 'Failed to update user status: ' . $conn->error]);
     }
 }
