@@ -567,6 +567,34 @@ require_login();
             margin-top: 10px;
         }
         
+        /* Header and Logo Styles */
+        header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        
+        header h1 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+        
+        header h1 img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        
+        header p {
+            margin: 5px 0 0 55px;
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
         /* Add Computer button enhancements */
         #addComputerBtn {
             padding: 12px 18px;
@@ -574,10 +602,8 @@ require_login();
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-        
-        #addComputerBtn i {
-            font-size: 18px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -587,7 +613,7 @@ require_login();
     <div class="container">
         <div class="content-wrapper">
             <header>
-                <h1><img src="IMG/logo.png" alt="Logo" style="width: 50px; height: auto;"> Computer Inventory Management System</h1>
+                <h1><img src="IMG/logo.png" alt="Logo"> Computer Inventory Management System</h1>
                 <p>Track and manage all computer assets across departments</p>
             </header>
 

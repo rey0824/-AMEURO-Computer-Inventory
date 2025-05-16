@@ -10,7 +10,7 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'User';
 <div class="header">
     <div class="header-content">
         <div class="logo">
-            <h2><i class="fas fa-laptop-code"></i> AMEURO Computer-Inventory</h2>
+        <h1><img src="IMG/ameuro.png" alt="Logo"> AMEURO Computer-Inventory</h1>
         </div>
         <div class="header-right">
             <nav class="menu">

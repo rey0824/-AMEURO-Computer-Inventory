@@ -517,31 +517,33 @@ header p {
     opacity: 0;
     transition: all 0.3s ease-in-out;
     backdrop-filter: blur(4px);
+    padding: 20px 0;
+    overflow-y: auto;
 }
 
 .modal.show {
     opacity: 1;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
 }
 
 .modal-content {
     position: relative;
     background-color: #fff;
-    margin: 30px auto;
-    width: 98vw;
-    max-width: 1400px;
-    min-width: 600px;
-    border-radius: 16px;
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+    min-width: 800px;
+    border-radius: 12px;
     box-shadow: 0 8px 32px rgba(80, 120, 200, 0.15);
     overflow: hidden;
     z-index: 1001;
-    max-height: calc(100vh - 60px);
+    max-height: calc(100vh - 40px);
     display: flex;
     flex-direction: column;
     padding: 0;
-    transform: translateY(20px);
+    transform: translateY(0);
     transition: transform 0.3s ease-in-out;
 }
 
@@ -550,15 +552,16 @@ header p {
 }
 
 .modal-header {
-    border-radius: 16px 16px 0 0;
+    border-radius: 12px 12px 0 0;
     background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
     color: #fff;
-    padding: 24px 32px;
+    padding: 20px 24px;
     font-size: 1.2rem;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+    gap: 16px;
 }
 
 .modal-header i {
@@ -591,12 +594,12 @@ header p {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 28px 38px;
+    padding: 20px 24px;
     position: relative;
     background: linear-gradient(135deg, #33ccff 0%, #4e73df 100%);
     border-bottom: none;
-    border-radius: 22px 22px 0 0;
-    box-shadow: 0 4px 16px rgba(51, 204, 255, 0.09);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #historyTimestamp {
